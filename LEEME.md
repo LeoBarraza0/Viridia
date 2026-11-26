@@ -40,8 +40,8 @@ Si prefieren no usar Actions, también sirve **Source: Deploy from a branch → 
 | Nuestra empresa | Logo, eslogan, qué hace, problema, cuatro datos con fuente, ejemplo de cálculo, propuesta de valor, segmentos, qué no es | Botones a la arquitectura y al simulador | Identidad |
 | Tablero | Inventario de las doce colecciones (OE, C, procesos, RN, entidades, A, I, T, R, B, P, H), cadena de evidencia y coherencia calculada en vivo | Cada identificador abre su ficha; «Recorrer la cadena» | Todas |
 | Estrategia | Misión, Visión 2031, OE1–OE5, C1–C10, matriz de cobertura, cadena de alineación, C2 crítica, vista ArchiMate de motivación interactiva | Un objetivo ilumina sus capacidades en el mapa, la matriz y la vista ArchiMate; mostrar las relaciones de soporte | Estrategia |
-| Procesos | Organigrama, mapa de 14 procesos, flujo de un cliente, los 3 BPMN en el visor bpmn-js con la paleta de VIRIDIA, RN1–RN8, actores | Clic en una tarea: responsable, reglas y trazabilidad; resaltar una regla en el diagrama; pantalla completa | Negocio |
-| Simulador | 12 facturas ficticias de energía que se leen y analizan, línea base con ASHRAE 14, contrato (RN2) y cierre mensual (RN3, RN1) | Tres clientes, lectura animada de las facturas, impresión en PDF, CSV propio, escenarios, camino iluminado sobre el BPMN | Negocio e información |
+| Procesos | Organigrama, mapa de 14 procesos, flujo de un cliente, los 3 BPMN en el visor bpmn-js con la paleta de VIRIDIA, RN1–RN8, actores | «Reproducir el flujo»: una ficha recorre el proceso paso a paso (con los mensajes entre participantes); clic en una tarea: responsable, reglas y trazabilidad; resaltar una regla; pantalla completa | Negocio |
+| Simulador | 12 facturas ficticias de energía que se leen y analizan, línea base con ASHRAE 14, contrato (RN2) y cierre mensual (RN3, RN1) | Tres clientes; recepción de los archivos del cliente (.zip, PDF, Excel o CSV, arrastrándolos); lectura animada de las facturas; impresión en PDF; escenarios; camino iluminado sobre el BPMN | Negocio e información |
 | Información | MER de 18 tablas y 21 relaciones, flujo del dato, cadena de RN1, matriz CRUD, diccionario | Clic en una tabla: atributos, relaciones y CRUD; «Seguir la cadena de RN1» | Información |
 | Aplicaciones | Vista por capas, I1–I16, catálogo A1–A10, matriz aplicación × proceso | Clic en una aplicación ilumina sus integraciones; «Reproducir el recorrido» 1 a 7 | Aplicaciones |
 | Tecnología | Despliegue T1–T16, principios, modelo de servicio, topología de la red de la sede, seguridad, RPO/RTO, riesgos R1–R8 | Clic en un nodo: qué aloja y sus controles; clic en una VLAN: su regla de acceso | Tecnología |
@@ -56,14 +56,15 @@ En todas las pantallas: buscador global (`Ctrl K` o `/`) por identificador o pal
 1. **Nuestra empresa** (1 min): la frase de qué hace VIRIDIA y el ejemplo «sin ahorro verificado no hay factura».
 2. **Tablero** (30 s): pulsar «Recorrer la cadena» para mostrar el hilo de punta a punta.
 3. **Estrategia** (1 min): tocar OE2 y mostrar cómo se iluminan C2, C3, C4, C7 y C9; señalar C2 como crítica.
-4. **Procesos** (1,5 min): abrir el BPMN parte 1, tocar «Evaluar prefactibilidad» y luego resaltar RN2.
-5. **Simulador** (2,5 min): planta de alimentos: «Leer y analizar las facturas» (las 12 facturas ficticias se leen una por una y se cruzan con la producción y el clima) → potencial de 14,4 % → línea base que cumple ASHRAE 14 → contrato → cierre mensual con la factura de $ 23,9 M y su traza a la línea base v1. Luego «Datos incompletos» (RN3) y «Sin ahorro» (RN1). Si sobra tiempo: el hotel, que no cumple ASHRAE hasta agregar la tercera variable.
+4. **Procesos** (1,5 min): abrir el BPMN parte 1 y pulsar «Reproducir el flujo»; luego tocar «Evaluar prefactibilidad» y resaltar RN2.
+5. **Simulador** (2,5 min): planta de alimentos: soltar el paquete `alimentos.zip` en la zona de recepción y pulsar «Leer y analizar las facturas» (las 12 facturas ficticias se leen una por una y se cruzan con la producción y el clima) → potencial de 14,4 % → línea base que cumple ASHRAE 14 → contrato → cierre mensual con la factura de $ 23,9 M y su traza a la línea base v1. Luego «Datos incompletos» (RN3) y «Sin ahorro» (RN1). Si sobra tiempo: el hotel, que no cumple ASHRAE hasta agregar la tercera variable.
 6. **Información y Aplicaciones** (1,5 min): «Seguir la cadena de RN1» en el MER y «Reproducir el recorrido» en la vista por capas.
 7. **Tecnología y Transformación** (1,5 min): un nodo crítico (T2 o T10), «Recorrer una lectura» en la vista integrada ArchiMate y la fase 1 del roadmap con las brechas que cierra.
 8. **Trazabilidad** (30 s): elegir OE3 y mostrar que todas las cadenas llegan a un proyecto.
 
 ## El simulador
 
+- **Recepción de archivos**: el simulador recibe el paquete .zip del cliente, sus facturas en PDF, el histórico de facturación en Excel, el Excel de operación (producción y clima) o un CSV. Los lee en el navegador, sin librerías ni servidor: reconoce la cuenta y, si es la de un cliente de ejemplo, completa lo que falte con sus datos. Si se edita el Excel del histórico (por ejemplo, el consumo de un mes) el análisis se rehace con esas cifras. Los paquetes de prueba están en `descargas/facturas/` (uno por cliente) y sueltos en `../Facturas de prueba/`; «Usar las facturas de ejemplo» salta la carga.
 - **Facturas ficticias**: cada cliente trae 12 facturas de energía de una comercializadora inventada («Energía Demo del Caribe», con sello «ILUSTRATIVA»). Las genera `MotorVIRIDIA.factura` a partir de los consumos supuestos: lecturas acumuladas con factor 1, energía reactiva y factor de potencia, costo unitario repartido en G, T, D, Cv, PR y R, contribución del 20 % (exenta para uso industrial) y total. «Leer y analizar las facturas» las recorre una a una, extrae consumo, costo unitario, valor de la energía y factor de potencia, y luego las cruza con la producción y el clima. «Imprimir o guardar en PDF» saca las 12, una por página.
 - **Prefactibilidad** (BPMN parte 1, «¿Hay potencial de ahorro?»): con lo extraído de las facturas, ajusta qué parte del consumo explican la producción y el clima y estima el potencial como lo que la planta dejaría de consumir si operara siempre como en sus tres mejores meses. Hay potencial si llega al 8 % que VIRIDIA compromete como mínimo. Es una regla ilustrativa del simulador y así se declara en pantalla.
 - **Línea base** (IPMVP, ASHRAE Guideline 14): regresión por mínimos cuadrados con las variables elegidas. Se acepta si CV(RMSE) ≤ 15 % y NMBE dentro de ±5 %. Los coeficientes se registran con cuatro cifras significativas (versión 1).
@@ -105,9 +106,10 @@ Activo-Digital/
 | El PDF, un `.bpmn`, el SQL o una vista ArchiMate | `node herramientas/empaquetar.js` |
 | Una ilustración | Reemplazar el original en `herramientas/originales/` y correr `python herramientas/procesar_laminas.py` |
 | La imagen para compartir | `python herramientas/generar_og.py` |
+| Los clientes de ejemplo o la plantilla de la factura | `python herramientas/generar_facturas.py` rehace los paquetes de prueba (12 PDF con sus datos en los metadatos, histórico y operación en Excel) |
 | Cualquier pantalla | `python herramientas/capturas.py` abre las 11 pantallas en Edge o Chrome, informa errores y guarda capturas (sirven para un anexo del PDF) |
 
-Los scripts de Python necesitan `pip install playwright pillow numpy`. Usan el Edge o el Chrome ya instalados.
+Los scripts de Python necesitan `pip install playwright pillow numpy pypdf openpyxl`. Usan el Edge o el Chrome ya instalados.
 
 ## Pendientes del equipo
 

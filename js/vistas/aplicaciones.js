@@ -70,15 +70,16 @@
     seg('T1', 'A1', 5, 1.05, 4.2, 1.05, '', ['T1'])
   ];
   var NUMEROS = [[1, 'T1'], [2, 'A1'], [3, 'A2'], [4, 'A3'], [5, 'A4'], [6, 'A7'], [7, 'DIAN']];
-  // Recorrido de una lectura: tramos del pulso y qué se ilumina en cada paso.
+  // Recorrido de una lectura: tramos del pulso, nodos que se encienden (incluidos los almacenes que nombra el
+  // paso) y aristas que recorre. Lo encendido se queda encendido: el camino se va dibujando.
   var TRAMOS = [
-    { paso: 1, nodos: ['T1'], puntos: [[6.65, 1.05], [4.2, 1.05]] },
-    { paso: 2, nodos: ['A1', 'BUS'], puntos: [[2.7, 1.05], [1.4, 1.85], [1.4, 7.75], [2.9, 8.5]] },
-    { paso: 3, nodos: ['A2'], puntos: [[4.55, 7.75], [4.55, 5.1], [6.5, 3.95]] },
-    { paso: 4, nodos: ['GW', 'A3'], puntos: [[8, 5.1], [8, 8.5], [8.2, 9.85], [9.5, 10.65]] },
-    { paso: 5, nodos: ['A4'], puntos: [[10.8, 9.85], [10.8, 8.5], [12.5, 8.5], [12.5, 9.85], [13.9, 10.65]] },
-    { paso: 6, nodos: ['A7'], puntos: [[15.2, 9.85], [15.2, 8.5], [16.9, 8.5], [16.9, 9.85], [18.3, 10.65]] },
-    { paso: 7, nodos: ['DIAN'], puntos: [[19.4, 9.85], [19.4, 8.5], [18.6, 8.5], [18.6, 6.975], [17.5, 6.2]] }
+    { paso: 1, nodos: ['T1'], aristas: [['T1', 'A1']], puntos: [[6.65, 1.05], [4.2, 1.05]] },
+    { paso: 2, nodos: ['A1', 'BUS'], aristas: [['A1', 'BUS']], puntos: [[2.7, 1.05], [1.4, 1.85], [1.4, 7.75], [2.9, 8.5]] },
+    { paso: 3, nodos: ['A2', 'ST1'], aristas: [['BUS', 'A2']], puntos: [[4.55, 7.75], [4.55, 5.1], [6.5, 3.95]] },
+    { paso: 4, nodos: ['GW', 'A3', 'A10', 'ST2'], aristas: [['A2', 'GW'], ['GW', 'A3'], ['A10', 'GW']], puntos: [[8, 5.1], [8, 8.5], [8.2, 9.85], [9.5, 10.65]] },
+    { paso: 5, nodos: ['A4', 'ST3'], aristas: [['A3', 'GW'], ['GW', 'A4']], puntos: [[10.8, 9.85], [10.8, 8.5], [12.5, 8.5], [12.5, 9.85], [13.9, 10.65]] },
+    { paso: 6, nodos: ['A7', 'ST4'], aristas: [['A4', 'GW'], ['GW', 'A7']], puntos: [[15.2, 9.85], [15.2, 8.5], [16.9, 8.5], [16.9, 9.85], [18.3, 10.65]] },
+    { paso: 7, nodos: ['DIAN', 'NOTIF', 'A5'], aristas: [['A7', 'GW'], ['GW', 'DIAN'], ['BUS', 'NOTIF'], ['BUS', 'A5']], puntos: [[19.4, 9.85], [19.4, 8.5], [18.6, 8.5], [18.6, 6.975], [17.5, 6.2]] }
   ];
 
   function render() {
@@ -173,12 +174,14 @@
     if (reproduciendo) return;
     reproduciendo = true;
     V.panel.cerrar(true);
-    var diag = V.$('#capas'), texto = V.$('#recorrido-texto'), acumulado = [], k = 0;
+    var diag = V.$('#capas'), texto = V.$('#recorrido-texto'), acumulado = [], ks = [], k = 0;
     (function siguiente() {
       if (k >= TRAMOS.length) { reproduciendo = false; texto.innerHTML = 'Recorrido completo: la lectura llegó a la factura, solo porque el ahorro fue positivo (RN1).'; return; }
       var tr = TRAMOS[k], paso = AP.recorrido[k];
       acumulado = acumulado.concat(tr.nodos);
-      V.enfocar(diag, acumulado, []);
+      tr.aristas.forEach(function (p) { dibujadas.forEach(function (a, i) { if (a.de === p[0] && a.a === p[1]) ks.push(i); }); });
+      V.enfocar(diag, acumulado, ks);
+      V.$$('.nodo', diag).forEach(function (n) { n.classList.toggle('elegido', tr.nodos.indexOf(n.getAttribute('data-id')) >= 0); });
       texto.innerHTML = '<strong>' + paso.n + '.</strong> ' + t(paso.texto);
       V.pulso(diag, tr.puntos.map(function (p) { return [X(p[0]), Y(p[1])]; }), W, H, 1100).then(function () { k++; setTimeout(siguiente, V.movimiento() ? 650 : 900); });
     })();

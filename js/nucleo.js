@@ -45,6 +45,7 @@
     documento: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
     hoja: '<path d="M12 21c7-3 8-11 0-18C4 10 5 18 12 21z"/><path d="M12 21V8"/>',
     reproducir: '<path d="M7 5l12 7-12 7z"/>',
+    detener: '<rect x="6" y="6" width="12" height="12" rx="1.5"/>',
     rastro: '<circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h5l5-5M12 12l5 5"/>',
     datos: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>',
     subir: '<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
@@ -384,12 +385,13 @@
     });
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }) : null;
   function contar(el) {
-    var fin = Number(el.getAttribute('data-contar'));
-    if (!V.movimiento()) { el.textContent = V.fmt(fin); return; }
+    var fin = Number(el.getAttribute('data-contar')), dec = Number(el.getAttribute('data-dec')) || 0;
+    var formato = function (v) { return V.fmt(dec ? v : Math.round(v), dec); };
+    if (!V.movimiento()) { el.textContent = formato(fin); return; }
     var t0 = performance.now(), dur = 900;
     (function paso(t) {
       var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-      el.textContent = V.fmt(Math.round(fin * e));
+      el.textContent = formato(fin * e);
       if (k < 1) requestAnimationFrame(paso);
     })(t0);
   }

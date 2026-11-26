@@ -15,7 +15,7 @@
     var sugerido = pre.comprometibleMax ? Math.max(8, Math.min(pre.comprometibleMax, Math.round(pre.pct * 0.85))) : 8;
     return {
       cliente: cliente, paso: 1, pre: pre, vars: cliente.modelo.slice(), ajuste: null, contratoListo: false,
-      leidas: false, facturaVista: cliente.kwh.length - 1,
+      leidas: false, facturaVista: cliente.kwh.length - 1, recibidas: cliente.origen === 'archivos',
       contrato: { comprometido: sugerido, participacion: 40, duracion: 4 },
       mes: Object.assign({ ajuste: 0, recuperado: false }, cliente.mesReporte)
     };
@@ -131,6 +131,7 @@
       '<footer class="fl-pie"><span>Documento ficticio generado por el simulador con datos supuestos. La comercializadora no existe.</span>' + codigoBarras(f.numero) + '</footer>' +
       '<span class="fl-sello" aria-hidden="true">ILUSTRATIVA</span></article>';
   }
+  V.facturaHTML = facturaHTML; // herramientas/generar_facturas.py imprime con esta misma plantilla los PDF de prueba
   function filaExtraida(i, leida) {
     var c = S.cliente, f = leida ? M.factura(c, i) : null;
     return '<tr data-fila="' + i + '"><td>' + V.esc(c.meses[i]) + '</td>' + (leida
@@ -169,7 +170,9 @@
     (function siguiente() {
       if (i >= n) { terminarLectura(); return; }
       verFactura(i, true);
-      V.$('#estado-lectura').innerHTML = 'Leyendo la factura <b>' + (i + 1) + ' de ' + n + '</b>: ' + V.esc(c.meses[i]) + '…';
+      V.$('#estado-lectura').innerHTML = c.archivos
+        ? 'Leyendo <b>' + V.esc(c.archivos[i]) + '</b> (' + (i + 1) + ' de ' + n + ')…'
+        : 'Leyendo la factura <b>' + (i + 1) + ' de ' + n + '</b>: ' + V.esc(c.meses[i]) + '…';
       lectura = setTimeout(function () {
         V.$('#visor-factura .factura-luz').classList.add('leida');
         V.$('#filas-extraidas tr[data-fila="' + i + '"]').outerHTML = filaExtraida(i, true);
@@ -204,8 +207,83 @@
 
   /* ---------- Etapas ---------- */
   function etapa1() {
+    if (S.cliente.factura && !S.recibidas) return '<div class="etapa-sim">' + recepcion() + '</div>';
     var leidas = S.leidas || !S.cliente.factura;
-    return '<div class="etapa-sim">' + (S.cliente.factura ? bandeja(leidas) : '') + '<div id="analisis">' + (leidas ? analisis() : '') + '</div></div>';
+    return '<div class="etapa-sim">' + (S.aviso ? '<p class="aviso-recepcion">' + S.aviso + '</p>' : '') + (S.cliente.factura ? bandeja(leidas) : '') + '<div id="analisis">' + (leidas ? analisis() : '') + '</div></div>';
+  }
+  // Antes de analizar, el cliente entrega sus facturas: se arrastran los archivos o se usan las de ejemplo.
+  function recepcion() {
+    var c = S.cliente;
+    return '<div class="recepcion" id="zona-archivos">' +
+      '<div class="rec-sobres" aria-hidden="true">' + [0, 1, 2].map(function (k) { return '<span style="--k:' + k + '"><i></i><i></i><i></i></span>'; }).join('') + '</div>' +
+      '<h3>Recepción de las facturas · ' + V.esc(c.nombre) + '</h3>' +
+      '<p>Arrastra aquí el paquete del cliente: el <strong>.zip</strong>, las facturas en <strong>PDF</strong> o el histórico en <strong>Excel</strong>, con el Excel de operación (producción y clima).</p>' +
+      '<div class="acciones" style="justify-content:center"><button type="button" class="btn btn-verde" data-subir>' + V.icono('subir') + 'Elegir archivos</button><button type="button" class="btn btn-claro" id="usar-ejemplo">Usar las facturas de ejemplo</button></div>' +
+      '<p class="nota">¿No tienes los archivos? <a href="descargas/facturas/' + c.id + '.zip" download>Descarga el paquete de prueba de este cliente</a>: 12 facturas en PDF y dos Excel, todo ficticio.</p>' +
+      '<p class="error-sim" id="error-archivos" hidden></p></div>';
+  }
+  // Arma el cliente con lo que llegó en los archivos. Si la cuenta es la de un cliente de ejemplo, toma de él
+  // lo que los archivos no traen (sector, modelo, mes de reporte); si la operación no llegó, también sus variables.
+  function armarCliente(r) {
+    if (!r.facturas.length) {
+      if (r.csv) return leerCSV(r.csv);
+      throw new Error(r.ignorados.length ? 'ninguno trae facturas: ' + r.ignorados.join('; ') : 'no llegó ninguna factura.');
+    }
+    var fs = r.facturas, f0 = fs[0], cuenta = String(f0.cuenta || '');
+    if (fs.length < 6) throw new Error('llegaron ' + fs.length + ' facturas; la prefactibilidad necesita al menos 6 meses.');
+    var base = CLIENTES.filter(function (c) { return c.factura.cuenta === cuenta; })[0];
+    var meses = fs.map(function (x) { return x.periodo; }), variables;
+    if (r.operacion) {
+      variables = r.operacion.variables.map(function (v, j) {
+        return { id: v.id, nombre: v.nombre, unidad: v.unidad, fuente: v.fuente, valores: meses.map(function (m) {
+          var fila = r.operacion.filas.filter(function (x) { return x.periodo === m; })[0];
+          if (!fila || isNaN(fila.valores[j])) throw new Error('la operación no trae ' + v.nombre.toLowerCase() + ' de ' + m + '.');
+          return fila.valores[j];
+        }) };
+      });
+    } else if (base && base.meses.join() === meses.join()) variables = base.variables;
+    else throw new Error('falta el Excel de operación con la producción y el clima de cada mes.');
+    var ids = variables.map(function (v) { return v.id; });
+    var cliente = {
+      id: base ? base.id : 'cargado', origen: 'archivos', nombre: base ? base.nombre : String(f0.suscriptor || 'Cliente cargado'), ciudad: base ? base.ciudad : '',
+      sector: base ? base.sector : 'Datos cargados desde archivos', descripcion: fs.length + ' facturas recibidas',
+      meses: meses, kwh: fs.map(function (x) { return Number(x.kwh); }), tarifa: fs.map(function (x) { return Number(x.cu); }), variables: variables,
+      factura: base ? base.factura : { prefijo: 'EDC', cuenta: cuenta || 'sin cuenta', medidor: f0.medidor || '—', uso: f0.uso || 'No residencial', contribucion: Number(f0.contribucionPct) || 0, lecturaInicial: Number(f0.anteriorActiva) || 1000000, lecturaInicialReactiva: Number(f0.anteriorReactiva) || 300000 },
+      archivos: fs.map(function (x) { return x.archivo; })
+    };
+    if (cliente.kwh.concat(cliente.tarifa).some(function (v) { return !(v > 0); })) throw new Error('hay facturas con consumo o tarifa vacíos o en cero.');
+    cliente.modelo = base ? base.modelo.filter(function (id) { return ids.indexOf(id) >= 0; }) : [];
+    if (!cliente.modelo.length) cliente.modelo = ids.slice(0, Math.max(1, Math.min(ids.length, meses.length - 3)));
+    if (base && cliente.modelo.every(function (id) { return base.mesReporte[id] != null; })) cliente.mesReporte = base.mesReporte;
+    else {
+      var aj = M.ajustar(cliente.kwh, M.columnasDe(cliente, cliente.modelo));
+      cliente.mesReporte = { real: Math.round(aj.pred[aj.pred.length - 1] * 0.88), completitud: 98, tarifa: cliente.tarifa[cliente.tarifa.length - 1] };
+      variables.forEach(function (v) { cliente.mesReporte[v.id] = v.valores[v.valores.length - 1]; });
+    }
+    return cliente;
+  }
+  function recibir(lista) {
+    var caja = V.$('#error-archivos') || V.$('#error-csv');
+    if (!lista || !lista.length) return;
+    V.leerArchivos(lista).then(function (r) {
+      var cliente = armarCliente(r);
+      S = nuevoEstado(cliente);
+      S.recibidas = true;
+      var partes = [];
+      if (r.pdf) partes.push(r.pdf + ' facturas en PDF');
+      if (r.excel) partes.push(r.excel + (r.excel > 1 ? ' archivos' : ' archivo') + ' de Excel');
+      if (r.csv && !r.facturas.length) partes.push('un CSV');
+      S.aviso = cliente.factura ? '<strong>Recibido:</strong> ' + partes.join(' y ') + ' de la cuenta ' + V.esc(cliente.factura.cuenta) + ' · ' + V.esc(cliente.nombre) + '.' +
+        (r.ignorados.length ? ' <span>No se usaron: ' + r.ignorados.map(V.esc).join('; ') + '.</span>' : '') : '';
+      V.$('#error-csv').hidden = true;
+      if (!cliente.factura) S.aviso = '';
+      pintarEtapa();
+      V.$('#etapa').scrollIntoView({ behavior: V.movimiento() ? 'smooth' : 'auto', block: 'start' });
+    }).catch(function (err) {
+      caja = V.$('#error-archivos') || V.$('#error-csv');
+      caja.hidden = false;
+      caja.textContent = 'No se pudieron usar los archivos: ' + err.message;
+    });
   }
   // Cruce de las facturas con la operación y el clima: gráfica, hallazgos y la compuerta «¿Hay potencial?».
   function analisis() {
@@ -512,11 +590,11 @@
     }) +
     '<section class="seccion" id="clientes"><div class="contenido">' +
       '<h2>Elige un cliente</h2>' +
-      '<p class="intro">Tres plantas ilustrativas, cada una con un desenlace distinto, o tus propias facturas en CSV. Todos los valores de los clientes son supuestos del equipo.</p>' +
+      '<p class="intro">Tres clientes ilustrativos, cada uno con un desenlace distinto, o los archivos de un cliente: el paquete de prueba (.zip), sus facturas en PDF, Excel o CSV. Todos los valores de los clientes son supuestos del equipo.</p>' +
       '<div class="clientes" role="group" aria-label="Cliente">' + CLIENTES.map(function (c) {
         return '<button type="button" class="cliente" data-cliente="' + c.id + '" aria-pressed="false"><strong>' + V.esc(c.nombre) + ' · ' + V.esc(c.ciudad) + '</strong><span>' + V.esc(c.descripcion) + '</span><small>' + V.esc(c.sector) + '</small></button>';
       }).join('') +
-        '<div class="cliente propio"><strong>Tus facturas</strong><span>CSV con mes, kwh, tarifa y tus variables.</span><span class="acciones" style="margin:.5rem 0 0;gap:.4rem"><button type="button" class="btn btn-verde btn-chico" id="cargar-csv">' + V.icono('subir') + 'Cargar CSV</button><button type="button" class="btn btn-claro btn-chico" id="plantilla">Plantilla</button></span><input type="file" id="csv" accept=".csv,text/csv,text/plain" hidden></div>' +
+        '<div class="cliente propio"><strong>Archivos de un cliente</strong><span>El paquete .zip, facturas en PDF, Excel o un CSV. También puedes soltarlos aquí.</span><span class="acciones" style="margin:.5rem 0 0;gap:.4rem"><button type="button" class="btn btn-verde btn-chico" data-subir>' + V.icono('subir') + 'Subir archivos</button><button type="button" class="btn btn-claro btn-chico" id="plantilla">Plantilla CSV</button></span><input type="file" id="archivos" accept=".zip,.pdf,.xlsx,.csv,.txt" multiple hidden></div>' +
       '</div><p class="error-sim" id="error-csv" hidden></p>' +
       '<ol class="pasos" id="pasos-sim">' + [['Prefactibilidad', '¿Hay potencial de ahorro?'], ['Línea base', '¿Cumple ASHRAE 14?'], ['Contrato', 'RN2: se fija después de medir'], ['Cierre mensual', 'RN3 y RN1']].map(function (p, k) {
         return '<li class="paso" data-paso="' + (k + 1) + '"><button type="button" data-ir="' + (k + 1) + '"><span class="n">' + (k + 1) + '</span><strong>' + p[0] + '</strong><small>' + p[1] + '</small></button></li>';
@@ -586,7 +664,8 @@
       if ((b = e.target.closest('[data-factura]'))) { if (!V.$('#leer-facturas[disabled]')) verFactura(Number(b.getAttribute('data-factura')), false); return; }
       if (e.target.closest('#leer-facturas')) { leerFacturas(); return; }
       if (e.target.closest('#imprimir-facturas')) { imprimirFacturas(); return; }
-      if (e.target.closest('#cargar-csv')) { V.$('#csv').click(); return; }
+      if (e.target.closest('[data-subir]')) { V.$('#archivos').click(); return; }
+      if (e.target.closest('#usar-ejemplo')) { S.recibidas = true; S.aviso = ''; pintarEtapa(); return; }
       if (e.target.closest('#plantilla')) plantilla();
     });
     raiz.addEventListener('change', function (e) {
@@ -598,17 +677,17 @@
         S.vars.forEach(function (x) { if (S.mes[x] == null) S.mes[x] = S.cliente.mesReporte[x]; });
         S.contratoListo = false;
         pintarEtapa();
-      } else if (el.id === 'csv' && el.files[0]) {
-        var lector = new FileReader();
-        lector.onload = function () {
-          try { var c = leerCSV(String(lector.result)); elegirCliente(c); V.$$('.cliente[data-cliente]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); }); }
-          catch (err) { var caja = V.$('#error-csv'); caja.hidden = false; caja.textContent = 'No se pudo leer el archivo: ' + err.message; }
-          el.value = '';
-        };
-        lector.readAsText(el.files[0]);
+      } else if (el.id === 'archivos' && el.files.length) {
+        recibir(el.files);
+        el.value = '';
       } else if (el.id === 'm-rec') calcular(true);
       else if (el.id === 'c-dur') { S.contrato.duracion = Number(el.value); V.$('#d-dur').textContent = el.value + ' años'; }
     });
+    // Soltar archivos sobre la zona de recepción o sobre la tarjeta «Archivos de un cliente».
+    var zona = function (e) { return e.target.closest && e.target.closest('#zona-archivos, .cliente.propio'); };
+    raiz.addEventListener('dragover', function (e) { var z = zona(e); if (z) { e.preventDefault(); z.classList.add('sobre'); } });
+    raiz.addEventListener('dragleave', function (e) { var z = zona(e); if (z && !z.contains(e.relatedTarget)) z.classList.remove('sobre'); });
+    raiz.addEventListener('drop', function (e) { var z = zona(e); if (z) { e.preventDefault(); z.classList.remove('sobre'); recibir(e.dataTransfer.files); } });
     raiz.addEventListener('input', function (e) {
       var el = e.target;
       if (el.id === 'c-comp') {

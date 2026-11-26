@@ -240,10 +240,10 @@
   var LECTURA_INT = [
     { nodos: ['T1'], puntos: [[325, 1007], [107, 1007]] },
     { nodos: ['T2', 'A1'], puntos: [[107, 1007], [105, 540]] },
-    { nodos: ['A2'], puntos: [[105, 540], [365, 540]] },
-    { nodos: ['A3'], puntos: [[365, 540], [625, 540]] },
-    { nodos: ['A4'], puntos: [[625, 540], [885, 540]] },
-    { nodos: ['A7'], puntos: [[885, 540], [1145, 540]] },
+    { nodos: ['A2', 'LECTURA'], puntos: [[105, 540], [365, 540]] },
+    { nodos: ['A3', 'LINEA_BASE'], puntos: [[365, 540], [625, 540]] },
+    { nodos: ['A4', 'CALCULO_AHORRO'], puntos: [[625, 540], [885, 540]] },
+    { nodos: ['A7', 'FACTURA'], puntos: [[885, 540], [1145, 540]] },
     { nodos: ['DIAN'], puntos: [[1145, 540], [1405, 540]] }
   ];
   var leyendo = false;
@@ -258,6 +258,7 @@
       var tr = LECTURA_INT[k];
       acumulado = acumulado.concat(tr.nodos);
       V.enfocar(diag, acumulado);
+      V.$$('.nodo', diag).forEach(function (n) { n.classList.toggle('elegido', tr.nodos.indexOf(n.getAttribute('data-id')) >= 0); });
       texto.innerHTML = '<strong>' + AP.recorrido[k].n + '.</strong> ' + t(AP.recorrido[k].texto);
       V.pulso(diag, tr.puntos.map(function (p) { return [ix(p[0]), iy(p[1])]; }), IW, IH, 1000).then(function () { k++; setTimeout(paso, V.movimiento() ? 600 : 900); });
     })();

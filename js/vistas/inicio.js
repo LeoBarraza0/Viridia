@@ -25,7 +25,12 @@
             '<div class="acciones"><a class="btn btn-lima" href="#/tablero">Recorrer la arquitectura ' + V.icono('flecha') + '</a>' +
             '<a class="btn btn-borde" href="#/simulador">Simular un cliente</a></div>' +
           '</div>' +
-          '<div class="portada-lamina"><img class="lamina-entra" src="img/laminas/portada.webp" width="1391" height="931" alt="Grabado de una hoja de uva de playa cuyas nervaduras se convierten en una red de nodos, sobre el perfil de una planta agroindustrial del Caribe." fetchpriority="high"></div>' +
+          '<div class="portada-lamina"><img class="lamina-entra" src="img/laminas/portada.webp" width="1391" height="931" alt="Grabado de una hoja de uva de playa cuyas nervaduras se convierten en una red de nodos, sobre el perfil de una planta agroindustrial del Caribe." fetchpriority="high">' +
+            '<div class="portada-cifras">' +
+              cifra('<span data-contar="' + ej.pct + '" data-dec="1">' + V.fmt(ej.pct, 1) + '</span> %', 'menos consumo en el mes') +
+              cifra('$ <span data-contar="' + (ej.factura / 1e6).toFixed(1) + '" data-dec="1">' + V.fmt(ej.factura / 1e6, 1) + '</span> M', 'facturados solo por ahorro verificado') +
+              cifra('<span data-contar="' + ej.tco2e + '" data-dec="1">' + V.fmt(ej.tco2e, 1) + '</span> t', 'de CO<sub>2</sub>e evitadas') +
+            '</div><p class="portada-cifras-nota">Un mes de una planta de alimentos: el ejemplo de cálculo del documento.</p></div>' +
         '</div>' +
         '<div class="portada-cinta"><ol>' +
           '<li><span><strong>Mide</strong> en la planta del cliente</span></li>' +
@@ -36,10 +41,18 @@
         '</ol></div>' +
       '</section>' +
 
+      '<section class="seccion capas-sec" id="recorrido"><div class="contenido capas-rejilla">' +
+        '<div><h2>Cinco capas, un solo hilo</h2>' +
+          '<p class="intro">' + t(D.meta.pregunta) + ' Cada capa responde una parte, con los mismos identificadores del documento final, y ninguna pieza existe sin un objetivo que la justifique. Toca una lámina para abrir su capa.</p>' +
+          '<p>Encima de las cinco capas, la transformación lleva a VIRIDIA del arranque de 2026 al estado objetivo de 2031.</p>' +
+          '<div class="acciones"><a class="btn btn-lima" href="#/trazabilidad">Seguir el hilo ' + V.icono('flecha') + '</a><a class="btn btn-borde" href="#/transformacion">Ver la transformación</a></div></div>' +
+        '<div class="pila-caja revelar">' + pila() + '</div>' +
+      '</div></section>' +
+
       '<section class="seccion" id="problema"><div class="contenido">' +
         '<h2>Pagan cada mes por un consumo que no pueden explicar</h2>' +
         '<p class="intro">' + t(I.problema) + '</p>' +
-        '<div class="dos-col revelar">' + I.consecuencias.map(function (c) {
+        '<div class="tres-col revelar">' + I.consecuencias.map(function (c) {
           return '<div><h3>' + t(c.tipo) + '</h3><p class="medida" style="color:var(--texto-2);font-size:.97rem">' + t(c.texto) + '</p></div>';
         }).join('') + '</div>' +
         '<h3 style="margin:2.4rem 0 .9rem">Cuatro datos de fuentes primarias</h3>' +
@@ -99,26 +112,42 @@
       '<section class="seccion banda" id="identidad"><div class="contenido dos-col">' +
         '<div><h2>Nombre e identidad</h2><p>' + t(I.origenNombre) + '</p><p>' + t(I.logo) + '</p></div>' +
         '<div><h3>Figura jurídica</h3><p style="color:var(--texto-2)">' + t(I.figura) + '</p><h3>Sector económico</h3><p style="color:var(--texto-2)">' + t(I.sector) + '</p><h3>Alcance geográfico</h3><p style="color:var(--texto-2)">' + t(I.alcance) + '</p></div>' +
-      '</div></section>' +
-
-      '<section class="seccion" id="recorrido"><div class="contenido">' +
-        '<h2>Recorre la arquitectura</h2>' +
-        '<p class="intro">' + t(D.meta.pregunta) + ' Cada capa responde una parte, con los mismos identificadores del documento final.</p>' +
-        '<div class="indice-capas revelar">' +
-          capa('estrategia', 'Estrategia', 'Por qué existe la empresa, hacia dónde va y qué debe saber hacer.', 'OE1–OE5 · C1–C10') +
-          capa('procesos', 'Procesos', 'Qué trabajo hace, quién lo hace y bajo qué reglas.', 'E · M · S · RN1–RN8') +
-          capa('informacion', 'Información', 'Qué datos necesita el proceso y cómo protegen la regla RN1.', '15 entidades · 18 tablas') +
-          capa('aplicaciones', 'Aplicaciones', 'Qué sistemas apoyan el trabajo y cómo se integran.', 'A1–A10 · I1–I16') +
-          capa('tecnologia', 'Tecnología', 'Dónde corre todo y cómo se protege el histórico.', 'T1–T16 · R1–R8') +
-          capa('transformacion', 'Transformación', 'Cómo pasa del arranque actual al estado objetivo.', 'B1–B14 · P1–P12 · H1–H6') +
-        '</div>' +
       '</div></section>';
   }
   function fila(concepto, op, res) {
     return '<div class="mayor-fila"><span>' + t(concepto) + '</span><span class="op">' + t(op) + '</span><span class="res">' + t(res) + '</span></div>';
   }
-  function capa(ruta, nombre, texto, ids) {
-    return '<a href="#/' + ruta + '"><strong>' + nombre + '</strong><span>' + texto + '</span><code>' + ids + '</code></a>';
+  function cifra(valor, texto) { return '<div><b>' + valor + '</b><small>' + texto + '</small></div>'; }
+
+  // Las cinco capas como láminas isométricas apiladas; el hilo de la trazabilidad las atraviesa.
+  // Al entrar en pantalla la pila se abre (cada lámina parte de --junta y vuelve a su sitio).
+  function pila() {
+    var E = D.estrategia, N = D.negocio, AP = D.aplicaciones, TE = D.tecnologia;
+    var CAPAS = [
+      ['estrategia', 'Estrategia', E.objetivos.length + ' objetivos · ' + E.capacidades.length + ' capacidades', 'Por qué existe y hacia dónde va'],
+      ['procesos', 'Negocio', N.procesos.length + ' procesos · ' + N.reglas.length + ' reglas', 'Qué trabajo hace y bajo qué reglas'],
+      ['informacion', 'Información', '15 entidades · 18 tablas', 'Qué datos necesita el proceso'],
+      ['aplicaciones', 'Aplicaciones', AP.apps.length + ' aplicaciones · ' + AP.integraciones.length + ' integraciones', 'Qué sistemas lo apoyan'],
+      ['tecnologia', 'Tecnología', TE.nodos.length + ' nodos · ' + TE.riesgos.length + ' riesgos', 'Dónde corre todo']
+    ];
+    var cx = 190, hw = 160, hh = 80, g = 10, y0 = 92, paso = 94, medio = y0 + paso * 2;
+    var s = '<svg class="pila" viewBox="0 0 650 560" role="group" aria-label="Las cinco capas de la arquitectura">' +
+      '<line class="hilo" x1="' + cx + '" y1="' + y0 + '" x2="' + cx + '" y2="' + (y0 + paso * 4) + '"/><circle class="savia" cx="' + cx + '" cy="' + y0 + '" r="5"/>';
+    for (var k = CAPAS.length - 1; k >= 0; k--) { // de abajo hacia arriba: la lámina de encima tapa a la de abajo
+      var c = CAPAS[k], cy = y0 + paso * k;
+      s += '<a href="#/' + c[0] + '" class="placa" style="--k:' + k + ';--junta:' + Math.round((medio - cy) * 0.84) + 'px" aria-label="' + c[1] + ': ' + c[2] + '"><g class="cuerpo">' +
+        '<polygon class="lado-i" points="' + (cx - hw) + ',' + cy + ' ' + cx + ',' + (cy + hh) + ' ' + cx + ',' + (cy + hh + g) + ' ' + (cx - hw) + ',' + (cy + g) + '"/>' +
+        '<polygon class="lado-d" points="' + cx + ',' + (cy + hh) + ' ' + (cx + hw) + ',' + cy + ' ' + (cx + hw) + ',' + (cy + g) + ' ' + cx + ',' + (cy + hh + g) + '"/>' +
+        '<polygon class="cara" points="' + cx + ',' + (cy - hh) + ' ' + (cx + hw) + ',' + cy + ' ' + cx + ',' + (cy + hh) + ' ' + (cx - hw) + ',' + cy + '"/>' +
+        // El rótulo corre paralelo al borde delantero izquierdo: es la parte de la cara que la lámina de encima no tapa.
+        '<text class="rotulo-iso" text-anchor="middle" transform="matrix(0.894 0.447 -0.894 0.447 ' + (cx - 60) + ' ' + (cy + 30) + ')" y="5">' + c[1].toUpperCase() + '</text>' +
+        '<line class="guia" x1="' + (cx + hw + 6) + '" y1="' + cy + '" x2="' + (cx + hw + 30) + '" y2="' + cy + '"/>' +
+        '<text class="etq-nombre" x="' + (cx + hw + 40) + '" y="' + (cy - 6) + '">' + c[1] + '</text>' +
+        '<text class="etq-cuenta" x="' + (cx + hw + 40) + '" y="' + (cy + 13) + '">' + c[2] + '</text>' +
+        '<text class="etq-pregunta" x="' + (cx + hw + 40) + '" y="' + (cy + 31) + '">' + c[3] + '</text>' +
+      '</g></a>';
+    }
+    return s + '</svg>';
   }
 
   V.vistas.inicio = { titulo: 'Nuestra empresa', render: render };
