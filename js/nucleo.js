@@ -452,8 +452,8 @@
     if (i < 0) return '';
     var ant = ORDEN[i - 1], sig = ORDEN[i + 1];
     return '<nav class="siguiente" aria-label="Recorrido de la arquitectura"><div class="contenido">' +
-      (ant ? '<a href="#/' + ant[0] + '" class="sig-ant"><span>Anterior</span><strong>' + ant[1] + '</strong></a>' : '<span></span>') +
-      (sig ? '<a href="#/' + sig[0] + '" class="sig-sig"><span>Siguiente</span><strong>' + sig[1] + '</strong></a>' : '') + '</div></nav>';
+      (ant ? '<a href="#/' + ant[0] + '" class="sig-ant"><span><kbd aria-hidden="true">←</kbd> Anterior</span><strong>' + ant[1] + '</strong></a>' : '<span></span>') +
+      (sig ? '<a href="#/' + sig[0] + '" class="sig-sig"><span>Siguiente <kbd aria-hidden="true">→</kbd></span><strong>' + sig[1] + '</strong></a>' : '') + '</div></nav>';
   }
 
   /* ---------- Búsqueda global (Ctrl+K o /) ---------- */
@@ -577,6 +577,13 @@
       if (e.key === 'Escape') { ocultarTarjeta(); V.panel.cerrar(); V.$('.riel').classList.remove('abierto'); velo.classList.remove('visible'); }
       var escribiendo = /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
       if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !escribiendo)) { e.preventDefault(); V.abrirBuscador(); }
+      // ← y → pasan a la capa anterior o siguiente (útil al exponer), salvo al escribir o dentro de un diagrama desplazable.
+      var foco = document.activeElement;
+      if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !escribiendo && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey &&
+          !document.querySelector('dialog[open]') && !(foco && foco.closest && foco.closest('.desplaza, .djs-container, .bpmn-lienzo'))) {
+        var destino = V.$(e.key === 'ArrowRight' ? '.siguiente .sig-sig' : '.siguiente .sig-ant');
+        if (destino) { e.preventDefault(); location.hash = destino.getAttribute('href'); }
+      }
     });
     // Ficha breve sobre los identificadores, con un pequeño retardo para no estorbar.
     tarjeta = document.createElement('div');

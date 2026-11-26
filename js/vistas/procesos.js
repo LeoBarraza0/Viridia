@@ -64,7 +64,7 @@
           return '<button type="button" data-bpmn="' + d.id + '" aria-pressed="' + (d.id === diagramaActual) + '">' + (k < 2 ? 'Parte ' + (k + 1) + ' · ' : '') + t(d.titulo.split(':')[0]) + '</button>';
         }).join('') + '</div><span class="ayuda" id="bpmn-fases"></span>' +
           '<span class="acciones" style="margin:0"><button type="button" class="btn btn-verde btn-chico" id="bpmn-reproducir">' + V.icono('reproducir') + 'Reproducir el flujo</button>' + V.botonPantalla() + '</span></div>' +
-        '<div class="bpmn-lienzo" id="lienzo"><div class="bpmn-cargando">Cargando el diagrama…</div><p class="bpmn-paso" id="bpmn-paso" aria-live="polite" hidden></p>' +
+        '<div class="bpmn-lienzo" id="lienzo"><div class="bpmn-cargando">Cargando el diagrama…</div><p class="bpmn-paso" id="bpmn-paso" aria-live="polite" hidden></p><div class="bpmn-tarjeta" id="bpmn-tarjeta" hidden></div>' +
           '<div class="bpmn-zoom"><button type="button" data-zoom="mas" aria-label="Acercar">' + V.icono('mas') + '</button><button type="button" data-zoom="menos" aria-label="Alejar">' + V.icono('menos') + '</button><button type="button" data-zoom="ajustar" aria-label="Ajustar a la pantalla">' + V.icono('ajustar') + '</button></div></div>' +
         '<div class="bpmn-leyenda"><span><i></i>Tarea</span><span><i class="lg-call"></i>Subproceso (actividad de llamada)</span><span><i class="lg-gw"></i>Compuerta</span><span><i class="lg-ev"></i>Evento</span><span><i class="lg-msg"></i>Flujo de mensaje</span><span><i class="lg-regla"></i>Regla resaltada</span><span><i class="lg-camino"></i>Camino que tomó el simulador</span></div>' +
         '<div class="leyenda" id="bpmn-texto"></div>' +
@@ -92,8 +92,8 @@
   }
 
   /* ---------- Visor BPMN ---------- */
-  function cargarDiagrama(id) {
-    detenerFlujo();
+  function cargarDiagrama(id, enGira) {
+    if (!enGira) detenerFlujo();
     diagramaActual = id;
     var d = V.porId(N.diagramas, id);
     V.$$('[data-bpmn]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-bpmn') === id)); });
@@ -205,11 +205,12 @@
     cv.addMarker(el, clase);
     if (el.label) cv.addMarker(el.label, 'flujo-etiqueta');
   }
-  function narrar(el, sig, k, n) {
+  function narrar(el, sig, k, n, parte) {
     var a = ACT[diagramaActual + ':' + el.id], caja = V.$('#bpmn-paso');
-    var nombre = a ? a.nombre : (el.businessObject.name || (/Gateway$/.test(el.type) ? 'Unión de caminos' : /StartEvent$/.test(el.type) ? 'Inicio' : 'Evento'));
+    var nb = el.businessObject.name || '';
+    var nombre = a ? a.nombre : /Intermediate(Catch|Throw)Event$/.test(el.type) && nb.length <= 2 ? 'Enlace «' + nb + '»' : (nb || (/Gateway$/.test(el.type) ? 'Unión de caminos' : /StartEvent$/.test(el.type) ? 'Inicio' : 'Evento'));
     var salida = sig && el.outgoing.filter(function (c) { return c.target === sig; })[0], rama = salida && salida.businessObject.name;
-    caja.innerHTML = '<span class="bp-n">Paso ' + (k + 1) + ' de ' + n + '</span><strong>' + t(nombre) + (rama ? ' <b>→ ' + V.esc(rama) + '</b>' : '') + '</strong>' +
+    caja.innerHTML = '<span class="bp-n">' + (parte ? parte + ' · ' : '') + 'paso ' + (k + 1) + ' de ' + n + '</span><strong>' + t(nombre) + (rama ? ' <b>→ ' + V.esc(rama) + '</b>' : '') + '</strong>' +
       (a ? '<small>' + t(a.responsable) + (a.reglas.length ? ' · ' + a.reglas.join(', ') : '') + '</small>' : '');
     caja.hidden = false;
   }
@@ -221,66 +222,150 @@
     if (flujo) { flujo.cancelado = true; clearTimeout(flujo.espera); flujo = null; }
     botonFlujo(false);
     var l = V.$('#lienzo'), caja = V.$('#bpmn-paso');
-    if (l) l.classList.remove('reproduciendo');
+    if (l) l.classList.remove('reproduciendo', 'cambiando');
     if (caja) caja.hidden = true;
     if (!visor) return;
     ['flujo-visto', 'flujo-actual', 'flujo-etiqueta'].forEach(limpiarMarcas);
     var capa = visor.get('canvas').getLayer('viridia-ficha', 1000);
     while (capa.firstChild) capa.removeChild(capa.firstChild);
   }
+  // Recorrido completo: la ficha cruza de un diagrama a otro por los enlaces «A» y «B» y entra al subproceso del
+  // cierre mensual desde la actividad de llamada, en el orden en que se ejecuta el ciclo de servicio.
+  var GIRA = [
+    { d: 'bpmn1', ids: CAMINOS.bpmn1 },
+    { d: 'bpmn2', ids: ['v_A', 'v_par', 'v_m1', 'v_t', 'v_call'], entrada: 'El enlace «A» continúa en la parte 2' },
+    { d: 'bpmn3', ids: null, entrada: 'La actividad de llamada abre el subproceso del cierre mensual' },
+    { d: 'bpmn2', ids: ['v_call', 'v_gq', 'v_rec', 'v_m2', 'v_ga', 'v_mrv', 'v_rcv', 'v_cons', 'v_m3', 'v_gt', 'v_of', 'v_gr', 'v_B'], entrada: 'Cerrado el mes, el flujo vuelve a la parte 2' },
+    { d: 'bpmn1', ids: ['v_B', 'v_gw4', 'v_neg'], entrada: 'El enlace «B» regresa a la parte 1 para la renovación',
+      cierre: 'La renovación vuelve a negociar el contrato sin repetir instalación ni línea base: el ciclo de servicio continúa.' }
+  ];
+  function tramosDesde(d) { return d === 'bpmn1' ? GIRA : d === 'bpmn2' ? GIRA.slice(1) : [GIRA[2]]; }
+  function nombreParte(d) { var k = Number(d.charAt(4)); return (k < 3 ? 'Parte ' + k + ' · ' : '') + t(V.porId(N.diagramas, d).titulo.split(':')[0]); }
+  function esperar(ms, r) { return new Promise(function (fin) { r.espera = setTimeout(fin, ms); }); }
+  function rotular(html) { var caja = V.$('#bpmn-paso'); if (caja) { caja.innerHTML = html; caja.hidden = false; } }
+
   function reproducirFlujo() {
     if (!visor) return;
     if (flujo) { detenerFlujo(); return; }
     detenerFlujo();
-    var reg = visor.get('elementRegistry'), cv = visor.get('canvas');
-    var ids = diagramaActual === 'bpmn3' && caminoActivo ? caminoActivo.camino : CAMINOS[diagramaActual];
-    var nodos = ids.map(function (id) { return reg.get(id); }).filter(Boolean);
-    if (!nodos.length) return;
-    var r = flujo = { cancelado: false }, lento = V.movimiento();
-    V.$('#lienzo').classList.add('reproduciendo');
+    var r = flujo = { cancelado: false }, tramos = tramosDesde(diagramaActual), k = 0;
     botonFlujo(true);
+    (function siguiente() {
+      if (r.cancelado) return;
+      if (k >= tramos.length) { terminarFlujo(tramos); return; }
+      var tr = tramos[k], n = k++;
+      (tr.d === diagramaActual ? Promise.resolve() : cambiarDiagrama(tr, r))
+        .then(function () { return r.cancelado ? null : recorrer(tr, r, tramos.length > 1 ? 'Tramo ' + (n + 1) + ' de ' + tramos.length + ' · ' : ''); })
+        .then(siguiente);
+    })();
+  }
+  // Salto entre diagramas: el lienzo se desvanece, se abre el otro BPMN y la ficha sigue donde indica el enlace.
+  function cambiarDiagrama(tr, r) {
+    var l = V.$('#lienzo');
+    rotular('<span class="bp-n">' + V.esc(tr.entrada) + '</span><strong>' + nombreParte(tr.d) + '</strong>');
+    l.classList.add('cambiando');
+    return esperar(V.movimiento() ? 1100 : 200, r)
+      .then(function () { return r.cancelado ? null : cargarDiagrama(tr.d, true); })
+      .then(function () { l.classList.remove('cambiando'); return esperar(V.movimiento() ? 450 : 80, r); });
+  }
+  function recorrer(tr, r, prefijo) {
+    var reg = visor.get('elementRegistry'), cv = visor.get('canvas'), lento = V.movimiento();
+    var ids = tr.ids || (caminoActivo ? caminoActivo.camino : CAMINOS.bpmn3);
+    var nodos = ids.map(function (id) { return reg.get(id); }).filter(Boolean);
+    if (!nodos.length) return Promise.resolve();
+    V.$('#lienzo').classList.add('reproduciendo');
     var capa = cv.getLayer('viridia-ficha', 1000), ficha = document.createElementNS(SVGNS, 'g');
+    while (capa.firstChild) capa.removeChild(capa.firstChild);
     ficha.setAttribute('class', 'ficha-bpmn');
     ficha.innerHTML = '<circle class="onda" r="9"/><circle r="8"/>';
     capa.appendChild(ficha);
     var c0 = centro(nodos[0]);
     ficha.setAttribute('transform', 'translate(' + c0[0] + ' ' + c0[1] + ')');
     if (cv.zoom() < 0.8) cv.zoom(0.85, { x: c0[0], y: c0[1] });
-    var k = 0;
-    (function paso() {
-      if (r.cancelado) return;
-      if (k >= nodos.length) {
-        flujo = null; botonFlujo(false);
-        var ultimo = nodos[nodos.length - 1], nom = ultimo.businessObject.name || 'Fin';
-        V.$('#bpmn-paso').innerHTML = '<span class="bp-n">Flujo completo</span><strong>' + (/IntermediateThrowEvent$/.test(ultimo.type) ? 'Sigue por el enlace «' + V.esc(nom) + '» en el otro diagrama' : t(nom)) + '</strong><small>El camino recorrido queda resaltado. Toca cualquier elemento para ver su ficha.</small>';
-        cv.zoom('fit-viewport', 'auto');
-        return;
-      }
-      var el = nodos[k], prev = nodos[k - 1], con = prev && prev.outgoing.filter(function (c) { return c.target === el; })[0];
-      var pts = con ? [centro(prev)].concat(con.waypoints.map(function (p) { return [p.x, p.y]; }), [centro(el)]) : prev ? [centro(prev), centro(el)] : [centro(el)];
-      var largo = 0; for (var i = 1; i < pts.length; i++) largo += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-      seguir(el).then(function () { return mover(ficha, pts, lento ? Math.max(350, largo / 0.42) : 0, r); }).then(function () {
-        if (r.cancelado) return;
-        if (prev) cv.removeMarker(prev, 'flujo-actual');
-        if (con) marcar(con, 'flujo-visto');
-        marcar(el, 'flujo-visto');
-        cv.addMarker(el, 'flujo-actual');
-        // Los mensajes que entran o salen de este paso también se encienden; los que salen, con su propia ficha.
-        el.outgoing.concat(el.incoming).filter(function (c) { return c.type === 'bpmn:MessageFlow'; }).forEach(function (m) {
-          marcar(m, 'flujo-visto'); marcar(m.source === el ? m.target : m.source, 'flujo-visto');
-          if (m.source === el && lento) {
-            var sobre = document.createElementNS(SVGNS, 'circle');
-            sobre.setAttribute('r', '6'); sobre.setAttribute('class', 'mensaje-bpmn');
-            capa.appendChild(sobre);
-            mover(sobre, m.waypoints.map(function (p) { return [p.x, p.y]; }), 900, r).then(function () { sobre.remove(); });
-          }
+    return new Promise(function (fin) {
+      var k = 0;
+      (function paso() {
+        if (r.cancelado || k >= nodos.length) return fin();
+        var el = nodos[k], prev = nodos[k - 1], con = prev && prev.outgoing.filter(function (c) { return c.target === el; })[0];
+        var pts = con ? [centro(prev)].concat(con.waypoints.map(function (p) { return [p.x, p.y]; }), [centro(el)]) : prev ? [centro(prev), centro(el)] : [centro(el)];
+        var largo = 0; for (var i = 1; i < pts.length; i++) largo += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+        seguir(el).then(function () { return mover(ficha, pts, lento ? Math.max(350, largo / 0.42) : 0, r); }).then(function () {
+          if (r.cancelado) return fin();
+          if (prev) cv.removeMarker(prev, 'flujo-actual');
+          if (con) marcar(con, 'flujo-visto');
+          marcar(el, 'flujo-visto');
+          cv.addMarker(el, 'flujo-actual');
+          ramasYMensajes(el, nodos[k + 1], capa, r, lento);
+          narrar(el, nodos[k + 1], k, nodos.length, prefijo + nombreParte(diagramaActual));
+          var a = ACT[diagramaActual + ':' + el.id], pausa = !lento ? 220 : a ? (a.tipo === 'decision' ? 1000 : 1300) : /Gateway$/.test(el.type) ? 250 : 700;
+          k++;
+          r.espera = setTimeout(paso, pausa);
         });
-        narrar(el, nodos[k + 1], k, nodos.length);
-        var a = ACT[diagramaActual + ':' + el.id], pausa = !lento ? 220 : a ? (a.tipo === 'decision' ? 1000 : 1300) : /Gateway$/.test(el.type) ? 250 : 700;
-        k++;
-        r.espera = setTimeout(paso, pausa);
+      })();
+    });
+  }
+  // Mensajes que entran o salen del paso (con su propia ficha si salen) y ramas paralelas que no sigue el camino.
+  function ramasYMensajes(el, sig, capa, r, lento) {
+    el.outgoing.concat(el.incoming).filter(function (c) { return c.type === 'bpmn:MessageFlow'; }).forEach(function (m) {
+      marcar(m, 'flujo-visto'); marcar(m.source === el ? m.target : m.source, 'flujo-visto');
+      if (m.source === el && lento) volar(m.waypoints.map(function (p) { return [p.x, p.y]; }), 'mensaje-bpmn', capa, r);
+    });
+    if (el.type !== 'bpmn:ParallelGateway') return;
+    el.outgoing.filter(function (c) { return c.type === 'bpmn:SequenceFlow' && c.target !== sig; }).forEach(function (c) {
+      var pts = [centro(el)], tramo = c, n = 0;
+      while (tramo && n++ < 4) {
+        marcar(tramo, 'flujo-visto'); marcar(tramo.target, 'flujo-visto');
+        pts = pts.concat(tramo.waypoints.map(function (p) { return [p.x, p.y]; }), [centro(tramo.target)]);
+        var salen = tramo.target.outgoing.filter(function (x) { return x.type === 'bpmn:SequenceFlow'; });
+        tramo = salen.length === 1 ? salen[0] : null;
+      }
+      if (lento) volar(pts, 'ficha-rama', capa, r);
+    });
+  }
+  function volar(pts, clase, capa, r) {
+    var g = document.createElementNS(SVGNS, 'circle');
+    g.setAttribute('r', '6'); g.setAttribute('class', clase);
+    capa.appendChild(g);
+    mover(g, pts, 1000, r).then(function () { g.remove(); });
+  }
+  function terminarFlujo(tramos) {
+    var tr = tramos[tramos.length - 1], gira = tramos.length > 1;
+    flujo = null; botonFlujo(false);
+    var reg = visor.get('elementRegistry'), cv = visor.get('canvas'), capa = cv.getLayer('viridia-ficha', 1000);
+    while (capa.firstChild) capa.removeChild(capa.firstChild);
+    // Al reabrir un diagrama se pierden las marcas: se vuelven a poner todos los tramos que pasaron por él.
+    tramos.filter(function (x) { return x.d === diagramaActual; }).forEach(function (x) {
+      var ns = (x.ids || (caminoActivo ? caminoActivo.camino : CAMINOS.bpmn3)).map(function (id) { return reg.get(id); }).filter(Boolean);
+      ns.forEach(function (el, i) {
+        marcar(el, 'flujo-visto');
+        var con = ns[i - 1] && ns[i - 1].outgoing.filter(function (c) { return c.target === el; })[0];
+        if (con) marcar(con, 'flujo-visto');
       });
-    })();
+    });
+    var ids = tr.ids || (caminoActivo ? caminoActivo.camino : CAMINOS.bpmn3), ultimo = reg.get(ids[ids.length - 1]);
+    var nom = ultimo ? ultimo.businessObject.name || 'Fin' : 'Fin';
+    rotular('<span class="bp-n">' + (gira ? 'Ciclo de servicio completo' : 'Flujo completo') + '</span><strong>' +
+      (tr.cierre ? V.esc(tr.cierre) : t(nom)) + '</strong><small>' +
+      (gira ? 'Recorrió los tres diagramas: incorporación, operación con su cierre mensual y renovación.' : 'El cierre se repite cada mes: en la parte 2 lo llama la actividad «Cierre mensual».') +
+      ' El camino queda resaltado; toca cualquier elemento para ver su ficha.</small>');
+    visor.get('canvas').zoom('fit-viewport', 'auto');
+  }
+
+  // Ficha breve al pasar sobre una actividad, una decisión o un dato del diagrama.
+  function tarjetaBpmn(el, gfx) {
+    var caja = V.$('#bpmn-tarjeta'), k = diagramaActual + ':' + el.id, a = ACT[k], dato = N.elementosDatos[k];
+    if (!caja) return;
+    if (!a && !dato) { caja.hidden = true; return; }
+    var id = dato && (dato.app || dato.entidad), e = id && V.indice[id];
+    caja.innerHTML = a
+      ? '<span>' + (a.tipo === 'decision' ? 'Decisión' : a.tipo === 'evento' ? 'Evento' : 'Actividad') + ' · ' + t(a.responsable) + '</span><strong>' + t(a.nombre) + '</strong>' + (a.reglas.length ? '<small>Reglas: ' + a.reglas.join(', ') + '</small>' : '')
+      : '<span>' + (dato.app ? 'Aplicación' : 'Entidad del modelo de datos') + '</span><strong>' + V.esc(id) + (e && e.nombre !== id ? ' · ' + V.esc(e.nombre) : '') + '</strong>';
+    caja.hidden = false;
+    var r = gfx.getBoundingClientRect(), l = V.$('#lienzo').getBoundingClientRect();
+    var x = Math.min(l.width - caja.offsetWidth - 8, Math.max(8, r.left - l.left + r.width / 2 - caja.offsetWidth / 2));
+    var y = r.top - l.top - caja.offsetHeight - 10;
+    caja.style.left = x + 'px';
+    caja.style.top = (y < 8 ? r.bottom - l.top + 10 : y) + 'px';
   }
 
   function tablaActividades(id) {
@@ -334,6 +419,9 @@
         bpmnRenderer: { defaultFillColor: '#FFFFFF', defaultStrokeColor: '#1F2A2E', defaultLabelColor: '#1F2A2E' },
         textRenderer: { defaultStyle: { fontFamily: 'Lato, Segoe UI, sans-serif', fontSize: 12, lineHeight: 1.2 }, externalStyle: { fontSize: 11 } }
       });
+      visor.on('element.hover', function (ev) { tarjetaBpmn(ev.element, ev.gfx); });
+      visor.on('element.out', function () { var c = V.$('#bpmn-tarjeta'); if (c) c.hidden = true; });
+      visor.on('canvas.viewbox.changing', function () { var c = V.$('#bpmn-tarjeta'); if (c) c.hidden = true; });
       visor.on('element.click', function (ev) {
         var k = diagramaActual + ':' + ev.element.id, dato = N.elementosDatos[k];
         if (ACT[k]) abrirActividad(k);

@@ -4,7 +4,7 @@
   'use strict';
   var V = window.V, D = V.datos, t = V.t, FILAS = D.trazabilidad;
   var COLS = [
-    { k: 'actividad', titulo: 'Actividad (BPMN)', w: 232 },
+    { k: 'actividad', titulo: 'Actividad (BPMN)', w: 204 },
     { k: 'entidades', titulo: 'Entidad (MER)', w: 168 },
     { k: 'apps', titulo: 'Aplicación', w: 64 },
     { k: 'nodos', titulo: 'Nodo', w: 64 },
@@ -12,7 +12,7 @@
     { k: 'objetivos', titulo: 'Objetivo', w: 64 },
     { k: 'proyectos', titulo: 'Proyecto', w: 64 }
   ];
-  var GAP = 82, ALTO_FILA = 30, CAB = 40, W, H, items = [], venas = [], filtro = null;
+  var GAP = 58, ALTO_FILA = 30, CAB = 40, W, H, items = [], venas = [], filtro = null;
   var SIRVEN_A_TODAS = { A10: 'A10 (identidad y seguridad) protege a todas las aplicaciones: sirve a todas las filas.', T13: 'T13 (identidad y llaves) sirve a todas las filas.', T14: 'T14 (registro y monitoreo) sirve a todas las filas.', T15: 'T15 (región secundaria) no aparece en ninguna fila: respalda a T10, T11 y T12, que sí aparecen.', C10: 'C10 (talento) no tiene actividad en el proceso de servicio: es un proceso interno (S5) y el roadmap la cubre con P10.' };
 
   function valores(fila, k) { return k === 'actividad' ? [fila.actividad] : fila[k]; }
@@ -54,7 +54,7 @@
   function item(ci, v) { for (var i = 0; i < items.length; i++) if (items[i].col === ci && items[i].v === v) return items[i]; return null; }
   function svg() {
     construir();
-    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Nervadura de trazabilidad entre actividades, entidades, aplicaciones, nodos, capacidades, objetivos y proyectos" style="min-width:' + W + 'px">';
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Nervadura de trazabilidad entre actividades, entidades, aplicaciones, nodos, capacidades, objetivos y proyectos" style="min-width:900px">';
     s += COLS.map(function (c) { return '<text class="col-t" x="' + c.x + '" y="18">' + c.titulo + '</text>'; }).join('');
     s += venas.map(function (v, k) {
       var a = item(v.ci, v.a), b = item(v.ci + 1, v.b), x0 = a.x + a.w, x1 = b.x, m = (x0 + x1) / 2;
@@ -120,11 +120,16 @@
   function aplicar(id) {
     filtro = id || null;
     V.$$('.filtro[data-f]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-f') === filtro)); });
+    pintar(filtro, false);
+  }
+  // Enciende las cadenas de un elemento. En vista previa (al pasar el cursor) no cambia el filtro, el resumen ni la URL.
+  function pintar(filtro, previa) {
     var cont = V.$('#nervadura-svg'), resumen = V.$('#traza-resumen');
     if (!cont) return;
     var filas = [];
     if (filtro) FILAS.forEach(function (f, r) { COLS.forEach(function (c) { if (valores(f, c.k).indexOf(filtro) >= 0 && filas.indexOf(r) < 0) filas.push(r); }); });
     cont.classList.toggle('foco', !!filtro);
+    cont.classList.toggle('previa', !!previa && !!filtro);
     V.$$('.vena', cont).forEach(function (p) {
       var v = venas[Number(p.getAttribute('data-k'))];
       p.classList.toggle('viva', v.filas.some(function (r) { return filas.indexOf(r) >= 0; }));
@@ -135,6 +140,7 @@
       g.classList.toggle('viva', vivo);
       g.classList.toggle('origen', it.v === filtro);
     });
+    if (previa) return;
     V.$$('#tabla-traza tr[data-r]').forEach(function (tr) {
       var r = Number(tr.getAttribute('data-r'));
       tr.classList.toggle('resaltada', !!filtro && filas.indexOf(r) >= 0);
@@ -156,6 +162,15 @@
       raiz.addEventListener('click', function (e) {
         var b = e.target.closest('[data-f]'); if (b) { aplicar(b.getAttribute('data-f')); return; }
         var g = e.target.closest('.n-g'); if (g) { var v = items[Number(g.getAttribute('data-k'))].v; aplicar(filtro === v ? null : v); }
+      });
+      // Vista previa: al pasar sobre un elemento se ven sus cadenas; al salir vuelve el filtro elegido.
+      raiz.addEventListener('pointerover', function (e) {
+        var g = e.target.closest && e.target.closest('#nervadura-svg .n-g');
+        if (g) pintar(items[Number(g.getAttribute('data-k'))].v, true);
+      });
+      raiz.addEventListener('pointerout', function (e) {
+        var g = e.target.closest && e.target.closest('#nervadura-svg .n-g');
+        if (g && !(e.relatedTarget && g.contains(e.relatedTarget))) pintar(filtro, false);
       });
       raiz.addEventListener('keydown', function (e) {
         var g = e.target.closest && e.target.closest('.n-g');
