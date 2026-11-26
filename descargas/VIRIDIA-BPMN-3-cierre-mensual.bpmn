@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Def_3" targetNamespace="http://viridia.example/bpmn" exporter="generar_bpmn.py (VIRIDIA, Corte III)" exporterVersion="2.0">
+  <bpmn:collaboration id="Collab_3">
+    <bpmn:documentation>VIRIDIA S.A.S. BIC (empresa ficticia, uso académico). BPMN · Subproceso «Cierre mensual: cálculo y facturación del ahorro verificado».</bpmn:documentation>
+    <bpmn:participant id="P3_CLI" name="CLIENTE" processRef="Proc3_Cliente"/>
+    <bpmn:participant id="P3_VIR" name="VIRIDIA · Cierre mensual" processRef="Proc3_Cierre"/>
+    <bpmn:messageFlow id="Msg_3_32" name="Solicitud de ajuste" sourceRef="s_doc" targetRef="c_ajS"/>
+    <bpmn:messageFlow id="Msg_3_33" name="Aceptación" sourceRef="c_aj" targetRef="s_doc"/>
+    <bpmn:messageFlow id="Msg_3_34" name="Aviso de periodo pendiente" sourceRef="s_penE" targetRef="c_rev"/>
+    <bpmn:messageFlow id="Msg_3_35" name="Reporte mensual" sourceRef="s_emi" targetRef="c_rev"/>
+    <bpmn:messageFlow id="Msg_3_36" name="Factura electrónica" sourceRef="s_liq" targetRef="c_pay"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Proc3_Cliente" name="CLIENTE" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_P3_CLI">
+      <bpmn:lane id="L3_cli" name="Cliente (gerencia de planta)">
+        <bpmn:flowNodeRef>c_s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_rev</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_gw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_pay</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_endP</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_endN</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_ajS</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_aj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_ajE</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="c_s" name="Fin de mes">
+      <bpmn:outgoing>Flow_c_s_c_rev</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_c_s"><bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/P1M</bpmn:timeCycle></bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:task id="c_rev" name="Revisar el reporte o el aviso del mes">
+      <bpmn:incoming>Flow_c_s_c_rev</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_rev_c_gw</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="c_gw" name="¿Llegó factura?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_c_rev_c_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_gw_c_pay</bpmn:outgoing>
+      <bpmn:outgoing>Flow_c_gw_c_endN</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="c_pay" name="Pagar la factura electrónica">
+      <bpmn:incoming>Flow_c_gw_c_pay</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_pay_c_endP</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="c_endP" name="Mes conciliado">
+      <bpmn:incoming>Flow_c_pay_c_endP</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="c_endN" name="Sin pago este mes">
+      <bpmn:incoming>Flow_c_gw_c_endN</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="c_ajS" name="Solicitud recibida">
+      <bpmn:outgoing>Flow_c_ajS_c_aj</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_c_ajS"/>
+    </bpmn:startEvent>
+    <bpmn:task id="c_aj" name="Aceptar el ajuste no rutinario">
+      <bpmn:incoming>Flow_c_ajS_c_aj</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_aj_c_ajE</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="c_ajE" name="Ajuste aceptado">
+      <bpmn:incoming>Flow_c_aj_c_ajE</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_c_s_c_rev" sourceRef="c_s" targetRef="c_rev"/>
+    <bpmn:sequenceFlow id="Flow_c_rev_c_gw" sourceRef="c_rev" targetRef="c_gw"/>
+    <bpmn:sequenceFlow id="Flow_c_pay_c_endP" sourceRef="c_pay" targetRef="c_endP"/>
+    <bpmn:sequenceFlow id="Flow_c_ajS_c_aj" sourceRef="c_ajS" targetRef="c_aj"/>
+    <bpmn:sequenceFlow id="Flow_c_aj_c_ajE" sourceRef="c_aj" targetRef="c_ajE"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_pay" name="Sí" sourceRef="c_gw" targetRef="c_pay"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_endN" name="No" sourceRef="c_gw" targetRef="c_endN"/>
+  </bpmn:process>
+  <bpmn:process id="Proc3_Cierre" name="VIRIDIA · Cierre mensual" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_P3_VIR">
+      <bpmn:lane id="L3_ent" name="Entrega de Servicio">
+        <bpmn:flowNodeRef>s_eva</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_gnr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_doc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_m2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_cal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_emi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_gah</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_rvm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_endS</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L3_tec" name="Tecnología y Gob. de Datos">
+        <bpmn:flowNodeRef>s_s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_con</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_m1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_val</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_g95</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_rec</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_gdc</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_pen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_penE</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L3_fin" name="Finanzas e Inversión">
+        <bpmn:flowNodeRef>s_liq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s_endF</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s_s" name="Inicio del cierre">
+      <bpmn:outgoing>Flow_s_s_s_con</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="s_con" name="Consolidar lecturas y variables de operación del mes">
+      <bpmn:incoming>Flow_s_s_s_con</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_con_s_m1</bpmn:outgoing>
+      <bpmn:dataInputAssociation id="DIA_do_lec_s_con"><bpmn:sourceRef>do_lec</bpmn:sourceRef></bpmn:dataInputAssociation>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="s_m1" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_s_con_s_m1</bpmn:incoming>
+      <bpmn:incoming>Flow_s_gdc_s_m1</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_m1_s_val</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_val" name="Validar completitud y calidad de los datos">
+      <bpmn:incoming>Flow_s_m1_s_val</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_val_s_g95</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="s_g95" name="¿Completitud ≥ 95 %?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_s_val_s_g95</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_g95_s_rec</bpmn:outgoing>
+      <bpmn:outgoing>Flow_s_g95_s_eva</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_rec" name="Recuperar datos faltantes (respaldo de 72 h o lectura manual)">
+      <bpmn:incoming>Flow_s_g95_s_rec</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_rec_s_gdc</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="s_gdc" name="¿Datos completos?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_s_rec_s_gdc</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_gdc_s_pen</bpmn:outgoing>
+      <bpmn:outgoing>Flow_s_gdc_s_m1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_pen" name="Marcar el periodo como pendiente">
+      <bpmn:incoming>Flow_s_gdc_s_pen</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_pen_s_penE</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="s_penE" name="Periodo pendiente">
+      <bpmn:incoming>Flow_s_pen_s_penE</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MED_s_penE"/>
+    </bpmn:endEvent>
+    <bpmn:dataObject id="DO_do_lec"/>
+    <bpmn:dataObjectReference id="do_lec" name="LECTURA" dataObjectRef="DO_do_lec"/>
+    <bpmn:task id="s_eva" name="Evaluar la línea base vigente con las condiciones del mes">
+      <bpmn:incoming>Flow_s_g95_s_eva</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_eva_s_gnr</bpmn:outgoing>
+      <bpmn:dataInputAssociation id="DIA_do_lb_s_eva"><bpmn:sourceRef>do_lb</bpmn:sourceRef></bpmn:dataInputAssociation>
+    </bpmn:task>
+    <bpmn:dataObject id="DO_do_lb"/>
+    <bpmn:dataObjectReference id="do_lb" name="LINEA_BASE (versión vigente)" dataObjectRef="DO_do_lb"/>
+    <bpmn:exclusiveGateway id="s_gnr" name="¿Hubo evento no rutinario?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_s_eva_s_gnr</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_gnr_s_doc</bpmn:outgoing>
+      <bpmn:outgoing>Flow_s_gnr_s_m2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_doc" name="Documentar y acordar el ajuste no rutinario">
+      <bpmn:incoming>Flow_s_gnr_s_doc</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_doc_s_m2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="s_m2" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_s_doc_s_m2</bpmn:incoming>
+      <bpmn:incoming>Flow_s_gnr_s_m2</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_m2_s_cal</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_cal" name="Calcular ahorro, % de reducción y tCO₂e">
+      <bpmn:incoming>Flow_s_m2_s_cal</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_cal_s_emi</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_s_cal_do_ca"><bpmn:targetRef>do_ca</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataObject id="DO_do_ca"/>
+    <bpmn:dataObjectReference id="do_ca" name="CALCULO_AHORRO" dataObjectRef="DO_do_ca"/>
+    <bpmn:task id="s_emi" name="Emitir reporte mensual de ahorro">
+      <bpmn:incoming>Flow_s_cal_s_emi</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_emi_s_gah</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="s_gah" name="¿Ahorro &gt; 0?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_s_emi_s_gah</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_gah_s_rvm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_s_gah_s_liq</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="s_rvm" name="Revisar medidas de ahorro">
+      <bpmn:incoming>Flow_s_gah_s_rvm</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_rvm_s_endS</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="s_endS" name="Periodo sin facturación">
+      <bpmn:incoming>Flow_s_rvm_s_endS</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="s_liq" name="Liquidar participación (40 %) y emitir factura electrónica">
+      <bpmn:incoming>Flow_s_gah_s_liq</bpmn:incoming>
+      <bpmn:outgoing>Flow_s_liq_s_endF</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_s_liq_do_fac"><bpmn:targetRef>do_fac</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:endEvent id="s_endF" name="Factura emitida">
+      <bpmn:incoming>Flow_s_liq_s_endF</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:dataObject id="DO_do_fac"/>
+    <bpmn:dataObjectReference id="do_fac" name="FACTURA" dataObjectRef="DO_do_fac"/>
+    <bpmn:sequenceFlow id="Flow_s_s_s_con" sourceRef="s_s" targetRef="s_con"/>
+    <bpmn:sequenceFlow id="Flow_s_con_s_m1" sourceRef="s_con" targetRef="s_m1"/>
+    <bpmn:sequenceFlow id="Flow_s_m1_s_val" sourceRef="s_m1" targetRef="s_val"/>
+    <bpmn:sequenceFlow id="Flow_s_val_s_g95" sourceRef="s_val" targetRef="s_g95"/>
+    <bpmn:sequenceFlow id="Flow_s_pen_s_penE" sourceRef="s_pen" targetRef="s_penE"/>
+    <bpmn:sequenceFlow id="Flow_s_g95_s_rec" name="No" sourceRef="s_g95" targetRef="s_rec"/>
+    <bpmn:sequenceFlow id="Flow_s_rec_s_gdc" sourceRef="s_rec" targetRef="s_gdc"/>
+    <bpmn:sequenceFlow id="Flow_s_gdc_s_pen" name="No" sourceRef="s_gdc" targetRef="s_pen"/>
+    <bpmn:sequenceFlow id="Flow_s_gdc_s_m1" name="Sí: volver a validar" sourceRef="s_gdc" targetRef="s_m1"/>
+    <bpmn:sequenceFlow id="Flow_s_g95_s_eva" name="Sí" sourceRef="s_g95" targetRef="s_eva"/>
+    <bpmn:sequenceFlow id="Flow_s_eva_s_gnr" sourceRef="s_eva" targetRef="s_gnr"/>
+    <bpmn:sequenceFlow id="Flow_s_doc_s_m2" sourceRef="s_doc" targetRef="s_m2"/>
+    <bpmn:sequenceFlow id="Flow_s_m2_s_cal" sourceRef="s_m2" targetRef="s_cal"/>
+    <bpmn:sequenceFlow id="Flow_s_cal_s_emi" sourceRef="s_cal" targetRef="s_emi"/>
+    <bpmn:sequenceFlow id="Flow_s_emi_s_gah" sourceRef="s_emi" targetRef="s_gah"/>
+    <bpmn:sequenceFlow id="Flow_s_rvm_s_endS" sourceRef="s_rvm" targetRef="s_endS"/>
+    <bpmn:sequenceFlow id="Flow_s_gnr_s_doc" name="Sí" sourceRef="s_gnr" targetRef="s_doc"/>
+    <bpmn:sequenceFlow id="Flow_s_gnr_s_m2" name="No" sourceRef="s_gnr" targetRef="s_m2"/>
+    <bpmn:sequenceFlow id="Flow_s_gah_s_rvm" name="No" sourceRef="s_gah" targetRef="s_rvm"/>
+    <bpmn:sequenceFlow id="Flow_s_gah_s_liq" name="Sí" sourceRef="s_gah" targetRef="s_liq"/>
+    <bpmn:sequenceFlow id="Flow_s_liq_s_endF" sourceRef="s_liq" targetRef="s_endF"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_3" name="BPMN · Subproceso «Cierre mensual: cálculo y facturación del ahorro verificado»">
+    <bpmndi:BPMNPlane id="Plane_3" bpmnElement="Collab_3">
+      <bpmndi:BPMNShape id="P3_CLI_di" bpmnElement="P3_CLI" isHorizontal="true"><dc:Bounds x="0" y="0" width="1838" height="150"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L3_cli_di" bpmnElement="L3_cli" isHorizontal="true"><dc:Bounds x="26" y="0" width="1812" height="150"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P3_VIR_di" bpmnElement="P3_VIR" isHorizontal="true"><dc:Bounds x="0" y="168" width="1838" height="400"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L3_ent_di" bpmnElement="L3_ent" isHorizontal="true"><dc:Bounds x="26" y="168" width="1812" height="152"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L3_tec_di" bpmnElement="L3_tec" isHorizontal="true"><dc:Bounds x="26" y="320" width="1812" height="136"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L3_fin_di" bpmnElement="L3_fin" isHorizontal="true"><dc:Bounds x="26" y="456" width="1812" height="112"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_s_di" bpmnElement="c_s"><dc:Bounds x="149" y="36" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_rev_di" bpmnElement="c_rev"><dc:Bounds x="1243" y="21" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_gw_di" bpmnElement="c_gw" isMarkerVisible="true"><dc:Bounds x="1414" y="31" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_pay_di" bpmnElement="c_pay"><dc:Bounds x="1493" y="21" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_endP_di" bpmnElement="c_endP"><dc:Bounds x="1669" y="36" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_endN_di" bpmnElement="c_endN"><dc:Bounds x="1419" y="98" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_ajS_di" bpmnElement="c_ajS"><dc:Bounds x="919" y="98" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_aj_di" bpmnElement="c_aj"><dc:Bounds x="968" y="83" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_ajE_di" bpmnElement="c_ajE"><dc:Bounds x="1129" y="98" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_s_di" bpmnElement="s_s"><dc:Bounds x="149" y="371" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_con_di" bpmnElement="s_con"><dc:Bounds x="201" y="356" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_m1_di" bpmnElement="s_m1" isMarkerVisible="false"><dc:Bounds x="369" y="366" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_val_di" bpmnElement="s_val"><dc:Bounds x="433" y="356" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_g95_di" bpmnElement="s_g95" isMarkerVisible="true"><dc:Bounds x="599" y="366" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_rec_di" bpmnElement="s_rec"><dc:Bounds x="666" y="350" width="160" height="76"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_gdc_di" bpmnElement="s_gdc" isMarkerVisible="true"><dc:Bounds x="849" y="366" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_pen_di" bpmnElement="s_pen"><dc:Bounds x="913" y="356" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_penE_di" bpmnElement="s_penE"><dc:Bounds x="1074" y="371" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="do_lec_di" bpmnElement="do_lec"><dc:Bounds x="259" y="225" width="30" height="38"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_eva_di" bpmnElement="s_eva"><dc:Bounds x="666" y="230" width="160" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="do_lb_di" bpmnElement="do_lb"><dc:Bounds x="731" y="179" width="30" height="38"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_gnr_di" bpmnElement="s_gnr" isMarkerVisible="true"><dc:Bounds x="849" y="240" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_doc_di" bpmnElement="s_doc"><dc:Bounds x="913" y="230" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_m2_di" bpmnElement="s_m2" isMarkerVisible="false"><dc:Bounds x="1124" y="240" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_cal_di" bpmnElement="s_cal"><dc:Bounds x="1178" y="230" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="do_ca_di" bpmnElement="do_ca"><dc:Bounds x="1236" y="179" width="30" height="38"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_emi_di" bpmnElement="s_emi"><dc:Bounds x="1343" y="230" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_gah_di" bpmnElement="s_gah" isMarkerVisible="true"><dc:Bounds x="1509" y="240" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_rvm_di" bpmnElement="s_rvm"><dc:Bounds x="1588" y="230" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_endS_di" bpmnElement="s_endS"><dc:Bounds x="1754" y="245" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_liq_di" bpmnElement="s_liq"><dc:Bounds x="1451" y="474" width="160" height="76"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_endF_di" bpmnElement="s_endF"><dc:Bounds x="1649" y="495" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="do_fac_di" bpmnElement="do_fac"><dc:Bounds x="1361" y="493" width="30" height="38"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_c_s_c_rev_di" bpmnElement="Flow_c_s_c_rev"><di:waypoint x="183" y="53"/><di:waypoint x="1243" y="53"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_rev_c_gw_di" bpmnElement="Flow_c_rev_c_gw"><di:waypoint x="1389" y="53"/><di:waypoint x="1414" y="53"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_pay_c_endP_di" bpmnElement="Flow_c_pay_c_endP"><di:waypoint x="1639" y="53"/><di:waypoint x="1669" y="53"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_ajS_c_aj_di" bpmnElement="Flow_c_ajS_c_aj"><di:waypoint x="953" y="115"/><di:waypoint x="968" y="115"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_aj_c_ajE_di" bpmnElement="Flow_c_aj_c_ajE"><di:waypoint x="1114" y="115"/><di:waypoint x="1129" y="115"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_pay_di" bpmnElement="Flow_c_gw_c_pay"><di:waypoint x="1458" y="53"/><di:waypoint x="1493" y="53"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_endN_di" bpmnElement="Flow_c_gw_c_endN"><di:waypoint x="1436" y="75"/><di:waypoint x="1436" y="98"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_s_s_con_di" bpmnElement="Flow_s_s_s_con"><di:waypoint x="183" y="388"/><di:waypoint x="201" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_con_s_m1_di" bpmnElement="Flow_s_con_s_m1"><di:waypoint x="347" y="388"/><di:waypoint x="369" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_m1_s_val_di" bpmnElement="Flow_s_m1_s_val"><di:waypoint x="413" y="388"/><di:waypoint x="433" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_val_s_g95_di" bpmnElement="Flow_s_val_s_g95"><di:waypoint x="579" y="388"/><di:waypoint x="599" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_pen_s_penE_di" bpmnElement="Flow_s_pen_s_penE"><di:waypoint x="1059" y="388"/><di:waypoint x="1074" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_g95_s_rec_di" bpmnElement="Flow_s_g95_s_rec"><di:waypoint x="643" y="388"/><di:waypoint x="666" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_rec_s_gdc_di" bpmnElement="Flow_s_rec_s_gdc"><di:waypoint x="826" y="388"/><di:waypoint x="849" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gdc_s_pen_di" bpmnElement="Flow_s_gdc_s_pen"><di:waypoint x="893" y="388"/><di:waypoint x="913" y="388"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gdc_s_m1_di" bpmnElement="Flow_s_gdc_s_m1"><di:waypoint x="871" y="410"/><di:waypoint x="871" y="446"/><di:waypoint x="391" y="446"/><di:waypoint x="391" y="410"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DIA_do_lec_s_con_di" bpmnElement="DIA_do_lec_s_con"><di:waypoint x="274" y="263"/><di:waypoint x="274" y="356"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_g95_s_eva_di" bpmnElement="Flow_s_g95_s_eva"><di:waypoint x="621" y="366"/><di:waypoint x="621" y="262"/><di:waypoint x="666" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_eva_s_gnr_di" bpmnElement="Flow_s_eva_s_gnr"><di:waypoint x="826" y="262"/><di:waypoint x="849" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_doc_s_m2_di" bpmnElement="Flow_s_doc_s_m2"><di:waypoint x="1059" y="262"/><di:waypoint x="1124" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_m2_s_cal_di" bpmnElement="Flow_s_m2_s_cal"><di:waypoint x="1168" y="262"/><di:waypoint x="1178" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_cal_s_emi_di" bpmnElement="Flow_s_cal_s_emi"><di:waypoint x="1324" y="262"/><di:waypoint x="1343" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_emi_s_gah_di" bpmnElement="Flow_s_emi_s_gah"><di:waypoint x="1489" y="262"/><di:waypoint x="1509" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_rvm_s_endS_di" bpmnElement="Flow_s_rvm_s_endS"><di:waypoint x="1734" y="262"/><di:waypoint x="1754" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gnr_s_doc_di" bpmnElement="Flow_s_gnr_s_doc"><di:waypoint x="893" y="262"/><di:waypoint x="913" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gnr_s_m2_di" bpmnElement="Flow_s_gnr_s_m2"><di:waypoint x="871" y="284"/><di:waypoint x="871" y="308"/><di:waypoint x="1146" y="308"/><di:waypoint x="1146" y="284"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gah_s_rvm_di" bpmnElement="Flow_s_gah_s_rvm"><di:waypoint x="1553" y="262"/><di:waypoint x="1588" y="262"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DIA_do_lb_s_eva_di" bpmnElement="DIA_do_lb_s_eva"><di:waypoint x="746" y="217"/><di:waypoint x="746" y="230"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_s_cal_do_ca_di" bpmnElement="DOA_s_cal_do_ca"><di:waypoint x="1251" y="230"/><di:waypoint x="1251" y="217"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_gah_s_liq_di" bpmnElement="Flow_s_gah_s_liq"><di:waypoint x="1531" y="284"/><di:waypoint x="1531" y="474"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_s_liq_s_endF_di" bpmnElement="Flow_s_liq_s_endF"><di:waypoint x="1611" y="512"/><di:waypoint x="1649" y="512"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_s_liq_do_fac_di" bpmnElement="DOA_s_liq_do_fac"><di:waypoint x="1451" y="512"/><di:waypoint x="1391" y="512"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_32_di" bpmnElement="Msg_3_32"><di:waypoint x="936" y="230"/><di:waypoint x="936" y="132"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_33_di" bpmnElement="Msg_3_33"><di:waypoint x="1026" y="147"/><di:waypoint x="1026" y="230"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_34_di" bpmnElement="Msg_3_34"><di:waypoint x="1091" y="371"/><di:waypoint x="1091" y="159"/><di:waypoint x="1266" y="159"/><di:waypoint x="1266" y="85"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_35_di" bpmnElement="Msg_3_35"><di:waypoint x="1346" y="230"/><di:waypoint x="1346" y="85"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_36_di" bpmnElement="Msg_3_36"><di:waypoint x="1576" y="474"/><di:waypoint x="1576" y="85"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

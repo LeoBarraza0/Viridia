@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Def_1" targetNamespace="http://viridia.example/bpmn" exporter="generar_bpmn.py (VIRIDIA, Corte III)" exporterVersion="2.0">
+  <bpmn:collaboration id="Collab_1">
+    <bpmn:documentation>VIRIDIA S.A.S. BIC (empresa ficticia, uso académico). BPMN · Ciclo de servicio, parte 1: incorporación del cliente (fases 1 a 7).</bpmn:documentation>
+    <bpmn:participant id="P1_CLI" name="CLIENTE" processRef="Proc1_Cliente"/>
+    <bpmn:participant id="P1_VIR" name="VIRIDIA S.A.S. BIC" processRef="Proc1_Viridia"/>
+    <bpmn:messageFlow id="Msg_1_30" name="Solicitud y facturas" sourceRef="c_sol" targetRef="v_s"/>
+    <bpmn:messageFlow id="Msg_1_31" name="Aviso: sin potencial" sourceRef="v_no" targetRef="c_res"/>
+    <bpmn:messageFlow id="Msg_1_32" name="Propuesta" sourceRef="v_form" targetRef="c_res"/>
+    <bpmn:messageFlow id="Msg_1_33" name="Acceso a la planta" sourceRef="c_firm" targetRef="v_inst"/>
+    <bpmn:messageFlow id="Msg_1_34" name="Contrato de desempeño" sourceRef="v_neg" targetRef="c_cont"/>
+    <bpmn:messageFlow id="Msg_1_35" name="Plan de medidas y acompañamiento" sourceRef="v_acom" targetRef="c_eje"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Proc1_Cliente" name="CLIENTE" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_P1_CLI">
+      <bpmn:lane id="L1_cli" name="Cliente (gerencia de planta)">
+        <bpmn:flowNodeRef>c_s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_sol</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_res</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_gw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_no</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_firm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_B</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_cont</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_eje</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_A</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="c_s" name="Necesidad de reducir consumo">
+      <bpmn:outgoing>Flow_c_s_c_sol</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="c_sol" name="Solicitar el servicio y enviar las facturas">
+      <bpmn:incoming>Flow_c_s_c_sol</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_sol_c_res</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="c_res" name="Revisar el resultado de prefactibilidad">
+      <bpmn:incoming>Flow_c_sol_c_res</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_res_c_gw</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="c_gw" name="¿Hay propuesta?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_c_res_c_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_gw_c_firm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_c_gw_c_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="c_no" name="Sin servicio">
+      <bpmn:incoming>Flow_c_gw_c_no</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="c_firm" name="Firmar el comodato y dar acceso a la planta">
+      <bpmn:incoming>Flow_c_gw_c_firm</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_firm_c_m</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="c_B" name="B">
+      <bpmn:outgoing>Flow_c_B_c_m</bpmn:outgoing>
+      <bpmn:linkEventDefinition id="LED_c_B" name="B"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="c_m" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_c_firm_c_m</bpmn:incoming>
+      <bpmn:incoming>Flow_c_B_c_m</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_m_c_cont</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="c_cont" name="Firmar el contrato de desempeño">
+      <bpmn:incoming>Flow_c_m_c_cont</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_cont_c_eje</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="c_eje" name="Ejecutar las medidas con el ingeniero">
+      <bpmn:incoming>Flow_c_cont_c_eje</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_eje_c_A</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateThrowEvent id="c_A" name="A">
+      <bpmn:incoming>Flow_c_eje_c_A</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LED_c_A" name="A"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="Flow_c_s_c_sol" sourceRef="c_s" targetRef="c_sol"/>
+    <bpmn:sequenceFlow id="Flow_c_sol_c_res" sourceRef="c_sol" targetRef="c_res"/>
+    <bpmn:sequenceFlow id="Flow_c_res_c_gw" sourceRef="c_res" targetRef="c_gw"/>
+    <bpmn:sequenceFlow id="Flow_c_firm_c_m" sourceRef="c_firm" targetRef="c_m"/>
+    <bpmn:sequenceFlow id="Flow_c_m_c_cont" sourceRef="c_m" targetRef="c_cont"/>
+    <bpmn:sequenceFlow id="Flow_c_cont_c_eje" sourceRef="c_cont" targetRef="c_eje"/>
+    <bpmn:sequenceFlow id="Flow_c_eje_c_A" sourceRef="c_eje" targetRef="c_A"/>
+    <bpmn:sequenceFlow id="Flow_c_B_c_m" sourceRef="c_B" targetRef="c_m"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_firm" name="Sí" sourceRef="c_gw" targetRef="c_firm"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_no" name="No" sourceRef="c_gw" targetRef="c_no"/>
+  </bpmn:process>
+  <bpmn:process id="Proc1_Viridia" name="VIRIDIA S.A.S. BIC" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_P1_VIR">
+      <bpmn:lane id="L1_com" name="Comercial y Mercadeo">
+        <bpmn:flowNodeRef>v_s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_eval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gw1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_no</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_B</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gw4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_neg</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L1_leg" name="Legal y Cumplimiento">
+        <bpmn:flowNodeRef>v_form</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L1_tec" name="Tecnología y Gob. de Datos">
+        <bpmn:flowNodeRef>v_inst</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gw2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_cap</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L1_id" name="I+D en IA">
+        <bpmn:flowNodeRef>v_adj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gw3</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L1_ent" name="Entrega de Servicio">
+        <bpmn:flowNodeRef>v_diag</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_acom</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_A</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="v_s" name="Solicitud recibida">
+      <bpmn:outgoing>Flow_v_s_v_eval</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_v_s"/>
+    </bpmn:startEvent>
+    <bpmn:task id="v_eval" name="Evaluar prefactibilidad con facturas históricas">
+      <bpmn:incoming>Flow_v_s_v_eval</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_eval_v_gw1</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_gw1" name="¿Hay potencial de ahorro?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_eval_v_gw1</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gw1_v_no</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_gw1_v_form</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="v_no" name="Prospecto descartado">
+      <bpmn:incoming>Flow_v_gw1_v_no</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MED_v_no"/>
+    </bpmn:endEvent>
+    <bpmn:task id="v_form" name="Formalizar confidencialidad y comodato">
+      <bpmn:incoming>Flow_v_gw1_v_form</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_form_v_inst</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="v_inst" name="Instalar medidores y pasarela de planta">
+      <bpmn:incoming>Flow_v_form_v_inst</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_inst_v_gw2</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_v_inst_s_a8"><bpmn:targetRef>s_a8</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="s_a8" name="A8 Gestión de activos en comodato"/>
+    <bpmn:exclusiveGateway id="v_gw2" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_v_inst_v_gw2</bpmn:incoming>
+      <bpmn:incoming>Flow_v_gw3_v_gw2</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gw2_v_cap</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_cap" name="Capturar datos del periodo de referencia (12 meses)">
+      <bpmn:incoming>Flow_v_gw2_v_cap</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_cap_v_adj</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_v_cap_s_a2"><bpmn:targetRef>s_a2</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="s_a2" name="A2 Plataforma de series de tiempo"/>
+    <bpmn:task id="v_adj" name="Ajustar modelo de línea base">
+      <bpmn:incoming>Flow_v_cap_v_adj</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_adj_v_gw3</bpmn:outgoing>
+      <bpmn:dataInputAssociation id="DIA_s_a3_v_adj"><bpmn:sourceRef>s_a3</bpmn:sourceRef></bpmn:dataInputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="s_a3" name="A3 Motor analítico"/>
+    <bpmn:exclusiveGateway id="v_gw3" name="¿Cumple ASHRAE Guideline 14?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_adj_v_gw3</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gw3_v_gw2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_gw3_v_gw4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="v_B" name="B">
+      <bpmn:outgoing>Flow_v_B_v_gw4</bpmn:outgoing>
+      <bpmn:linkEventDefinition id="LED_v_B" name="B"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="v_gw4" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_v_B_v_gw4</bpmn:incoming>
+      <bpmn:incoming>Flow_v_gw3_v_gw4</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gw4_v_neg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_neg" name="Negociar y firmar contrato de desempeño">
+      <bpmn:incoming>Flow_v_gw4_v_neg</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_neg_v_diag</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DOA_v_neg_s_a6"><bpmn:targetRef>s_a6</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:task>
+    <bpmn:dataStoreReference id="s_a6" name="A6 CRM y gestión de contratos"/>
+    <bpmn:task id="v_diag" name="Diagnosticar desperdicio y priorizar medidas">
+      <bpmn:incoming>Flow_v_neg_v_diag</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_diag_v_acom</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="v_acom" name="Acompañar la implementación de medidas en planta">
+      <bpmn:incoming>Flow_v_diag_v_acom</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_acom_v_A</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateThrowEvent id="v_A" name="A">
+      <bpmn:incoming>Flow_v_acom_v_A</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LED_v_A" name="A"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="Flow_v_s_v_eval" sourceRef="v_s" targetRef="v_eval"/>
+    <bpmn:sequenceFlow id="Flow_v_eval_v_gw1" sourceRef="v_eval" targetRef="v_gw1"/>
+    <bpmn:sequenceFlow id="Flow_v_gw2_v_cap" sourceRef="v_gw2" targetRef="v_cap"/>
+    <bpmn:sequenceFlow id="Flow_v_adj_v_gw3" sourceRef="v_adj" targetRef="v_gw3"/>
+    <bpmn:sequenceFlow id="Flow_v_B_v_gw4" sourceRef="v_B" targetRef="v_gw4"/>
+    <bpmn:sequenceFlow id="Flow_v_gw4_v_neg" sourceRef="v_gw4" targetRef="v_neg"/>
+    <bpmn:sequenceFlow id="Flow_v_diag_v_acom" sourceRef="v_diag" targetRef="v_acom"/>
+    <bpmn:sequenceFlow id="Flow_v_acom_v_A" sourceRef="v_acom" targetRef="v_A"/>
+    <bpmn:sequenceFlow id="Flow_v_gw1_v_no" name="No" sourceRef="v_gw1" targetRef="v_no"/>
+    <bpmn:sequenceFlow id="Flow_v_gw1_v_form" name="Sí" sourceRef="v_gw1" targetRef="v_form"/>
+    <bpmn:sequenceFlow id="Flow_v_form_v_inst" sourceRef="v_form" targetRef="v_inst"/>
+    <bpmn:sequenceFlow id="Flow_v_inst_v_gw2" sourceRef="v_inst" targetRef="v_gw2"/>
+    <bpmn:sequenceFlow id="Flow_v_cap_v_adj" sourceRef="v_cap" targetRef="v_adj"/>
+    <bpmn:sequenceFlow id="Flow_v_gw3_v_gw2" name="No: medir más" sourceRef="v_gw3" targetRef="v_gw2"/>
+    <bpmn:sequenceFlow id="Flow_v_gw3_v_gw4" name="Sí" sourceRef="v_gw3" targetRef="v_gw4"/>
+    <bpmn:sequenceFlow id="Flow_v_neg_v_diag" sourceRef="v_neg" targetRef="v_diag"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_1" name="BPMN · Ciclo de servicio, parte 1: incorporación del cliente (fases 1 a 7)">
+    <bpmndi:BPMNPlane id="Plane_1" bpmnElement="Collab_1">
+      <bpmndi:BPMNShape id="P1_CLI_di" bpmnElement="P1_CLI" isHorizontal="true"><dc:Bounds x="0" y="0" width="1663" height="136"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_cli_di" bpmnElement="L1_cli" isHorizontal="true"><dc:Bounds x="26" y="0" width="1637" height="136"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P1_VIR_di" bpmnElement="P1_VIR" isHorizontal="true"><dc:Bounds x="0" y="154" width="1663" height="548"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_com_di" bpmnElement="L1_com" isHorizontal="true"><dc:Bounds x="26" y="154" width="1637" height="112"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_leg_di" bpmnElement="L1_leg" isHorizontal="true"><dc:Bounds x="26" y="266" width="1637" height="104"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_tec_di" bpmnElement="L1_tec" isHorizontal="true"><dc:Bounds x="26" y="370" width="1637" height="112"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_id_di" bpmnElement="L1_id" isHorizontal="true"><dc:Bounds x="26" y="482" width="1637" height="112"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L1_ent_di" bpmnElement="L1_ent" isHorizontal="true"><dc:Bounds x="26" y="594" width="1637" height="108"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_s_di" bpmnElement="c_s"><dc:Bounds x="149" y="61" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_sol_di" bpmnElement="c_sol"><dc:Bounds x="201" y="46" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_res_di" bpmnElement="c_res"><dc:Bounds x="418" y="46" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_gw_di" bpmnElement="c_gw" isMarkerVisible="true"><dc:Bounds x="594" y="56" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_no_di" bpmnElement="c_no"><dc:Bounds x="689" y="13" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_firm_di" bpmnElement="c_firm"><dc:Bounds x="743" y="46" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_B_di" bpmnElement="c_B"><dc:Bounds x="1034" y="11" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_m_di" bpmnElement="c_m" isMarkerVisible="false"><dc:Bounds x="1069" y="56" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_cont_di" bpmnElement="c_cont"><dc:Bounds x="1128" y="46" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_eje_di" bpmnElement="c_eje"><dc:Bounds x="1413" y="46" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_A_di" bpmnElement="c_A"><dc:Bounds x="1579" y="61" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_s_di" bpmnElement="v_s"><dc:Bounds x="149" y="193" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_eval_di" bpmnElement="v_eval"><dc:Bounds x="201" y="178" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gw1_di" bpmnElement="v_gw1" isMarkerVisible="true"><dc:Bounds x="364" y="188" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_no_di" bpmnElement="v_no"><dc:Bounds x="459" y="193" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_form_di" bpmnElement="v_form"><dc:Bounds x="438" y="286" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_inst_di" bpmnElement="v_inst"><dc:Bounds x="543" y="394" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_a8_di" bpmnElement="s_a8"><dc:Bounds x="434" y="406" width="54" height="40"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gw2_di" bpmnElement="v_gw2" isMarkerVisible="false"><dc:Bounds x="714" y="404" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_cap_di" bpmnElement="v_cap"><dc:Bounds x="771" y="394" width="160" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_a2_di" bpmnElement="s_a2"><dc:Bounds x="974" y="406" width="54" height="40"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_adj_di" bpmnElement="v_adj"><dc:Bounds x="778" y="506" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_a3_di" bpmnElement="s_a3"><dc:Bounds x="684" y="518" width="54" height="40"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gw3_di" bpmnElement="v_gw3" isMarkerVisible="true"><dc:Bounds x="979" y="516" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_B_di" bpmnElement="v_B"><dc:Bounds x="1009" y="193" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gw4_di" bpmnElement="v_gw4" isMarkerVisible="false"><dc:Bounds x="1069" y="188" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_neg_di" bpmnElement="v_neg"><dc:Bounds x="1128" y="178" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_a6_di" bpmnElement="s_a6"><dc:Bounds x="1174" y="298" width="54" height="40"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_diag_di" bpmnElement="v_diag"><dc:Bounds x="1268" y="616" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_acom_di" bpmnElement="v_acom"><dc:Bounds x="1413" y="616" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_A_di" bpmnElement="v_A"><dc:Bounds x="1579" y="631" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_c_s_c_sol_di" bpmnElement="Flow_c_s_c_sol"><di:waypoint x="183" y="78"/><di:waypoint x="201" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_sol_c_res_di" bpmnElement="Flow_c_sol_c_res"><di:waypoint x="347" y="78"/><di:waypoint x="418" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_res_c_gw_di" bpmnElement="Flow_c_res_c_gw"><di:waypoint x="564" y="78"/><di:waypoint x="594" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_firm_c_m_di" bpmnElement="Flow_c_firm_c_m"><di:waypoint x="889" y="78"/><di:waypoint x="1069" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_m_c_cont_di" bpmnElement="Flow_c_m_c_cont"><di:waypoint x="1113" y="78"/><di:waypoint x="1128" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_cont_c_eje_di" bpmnElement="Flow_c_cont_c_eje"><di:waypoint x="1274" y="78"/><di:waypoint x="1413" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_eje_c_A_di" bpmnElement="Flow_c_eje_c_A"><di:waypoint x="1559" y="78"/><di:waypoint x="1579" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_B_c_m_di" bpmnElement="Flow_c_B_c_m"><di:waypoint x="1068" y="28"/><di:waypoint x="1091" y="28"/><di:waypoint x="1091" y="56"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_firm_di" bpmnElement="Flow_c_gw_c_firm"><di:waypoint x="638" y="78"/><di:waypoint x="743" y="78"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_no_di" bpmnElement="Flow_c_gw_c_no"><di:waypoint x="616" y="56"/><di:waypoint x="616" y="30"/><di:waypoint x="689" y="30"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_s_v_eval_di" bpmnElement="Flow_v_s_v_eval"><di:waypoint x="183" y="210"/><di:waypoint x="201" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_eval_v_gw1_di" bpmnElement="Flow_v_eval_v_gw1"><di:waypoint x="347" y="210"/><di:waypoint x="364" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw2_v_cap_di" bpmnElement="Flow_v_gw2_v_cap"><di:waypoint x="758" y="426"/><di:waypoint x="771" y="426"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_adj_v_gw3_di" bpmnElement="Flow_v_adj_v_gw3"><di:waypoint x="924" y="538"/><di:waypoint x="979" y="538"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_B_v_gw4_di" bpmnElement="Flow_v_B_v_gw4"><di:waypoint x="1043" y="210"/><di:waypoint x="1069" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw4_v_neg_di" bpmnElement="Flow_v_gw4_v_neg"><di:waypoint x="1113" y="210"/><di:waypoint x="1128" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_diag_v_acom_di" bpmnElement="Flow_v_diag_v_acom"><di:waypoint x="1414" y="648"/><di:waypoint x="1413" y="648"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_acom_v_A_di" bpmnElement="Flow_v_acom_v_A"><di:waypoint x="1559" y="648"/><di:waypoint x="1579" y="648"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw1_v_no_di" bpmnElement="Flow_v_gw1_v_no"><di:waypoint x="408" y="210"/><di:waypoint x="459" y="210"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw1_v_form_di" bpmnElement="Flow_v_gw1_v_form"><di:waypoint x="386" y="232"/><di:waypoint x="386" y="318"/><di:waypoint x="438" y="318"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_form_v_inst_di" bpmnElement="Flow_v_form_v_inst"><di:waypoint x="511" y="350"/><di:waypoint x="511" y="426"/><di:waypoint x="543" y="426"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_inst_v_gw2_di" bpmnElement="Flow_v_inst_v_gw2"><di:waypoint x="689" y="426"/><di:waypoint x="714" y="426"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_cap_v_adj_di" bpmnElement="Flow_v_cap_v_adj"><di:waypoint x="851" y="458"/><di:waypoint x="851" y="506"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw3_v_gw2_di" bpmnElement="Flow_v_gw3_v_gw2"><di:waypoint x="1001" y="560"/><di:waypoint x="1001" y="582"/><di:waypoint x="736" y="582"/><di:waypoint x="736" y="448"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gw3_v_gw4_di" bpmnElement="Flow_v_gw3_v_gw4"><di:waypoint x="1023" y="538"/><di:waypoint x="1091" y="538"/><di:waypoint x="1091" y="232"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_neg_v_diag_di" bpmnElement="Flow_v_neg_v_diag"><di:waypoint x="1274" y="210"/><di:waypoint x="1341" y="210"/><di:waypoint x="1341" y="616"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_v_inst_s_a8_di" bpmnElement="DOA_v_inst_s_a8"><di:waypoint x="543" y="426"/><di:waypoint x="488" y="426"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_v_cap_s_a2_di" bpmnElement="DOA_v_cap_s_a2"><di:waypoint x="931" y="426"/><di:waypoint x="974" y="426"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DIA_s_a3_v_adj_di" bpmnElement="DIA_s_a3_v_adj"><di:waypoint x="738" y="538"/><di:waypoint x="778" y="538"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DOA_v_neg_s_a6_di" bpmnElement="DOA_v_neg_s_a6"><di:waypoint x="1201" y="242"/><di:waypoint x="1201" y="298"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_30_di" bpmnElement="Msg_1_30"><di:waypoint x="226" y="110"/><di:waypoint x="226" y="145"/><di:waypoint x="166" y="145"/><di:waypoint x="166" y="193"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_31_di" bpmnElement="Msg_1_31"><di:waypoint x="476" y="193"/><di:waypoint x="476" y="152"/><di:waypoint x="491" y="152"/><di:waypoint x="491" y="110"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_32_di" bpmnElement="Msg_1_32"><di:waypoint x="446" y="286"/><di:waypoint x="446" y="110"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_33_di" bpmnElement="Msg_1_33"><di:waypoint x="756" y="110"/><di:waypoint x="756" y="145"/><di:waypoint x="666" y="145"/><di:waypoint x="666" y="394"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_34_di" bpmnElement="Msg_1_34"><di:waypoint x="1201" y="178"/><di:waypoint x="1201" y="110"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_35_di" bpmnElement="Msg_1_35"><di:waypoint x="1486" y="616"/><di:waypoint x="1486" y="110"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

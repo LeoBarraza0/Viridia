@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-26T00:32:18-05:00",
+  "title": "Design System: VIRIDIA · Activo digital de Arquitectura Empresarial",
+  "extensions": {
+    "colorMeta": {
+      "verde": {
+        "role": "primary",
+        "displayName": "Verde VIRIDIA",
+        "canonical": "#1B5E3A",
+        "tonalRamp": [
+          "#001400",
+          "#003110",
+          "#05502D",
+          "#30704B",
+          "#52926B",
+          "#75B68D",
+          "#99DBB1",
+          "#BEFFD5"
+        ]
+      },
+      "lima": {
+        "role": "secondary",
+        "displayName": "Lima",
+        "canonical": "#7FBF4D",
+        "tonalRamp": [
+          "#001300",
+          "#003100",
+          "#155100",
+          "#377300",
+          "#58961C",
+          "#7ABA48",
+          "#9EDF6D",
+          "#D4FEB9"
+        ]
+      },
+      "agua": {
+        "role": "tertiary",
+        "displayName": "Agua",
+        "canonical": "#2A7B9B",
+        "tonalRamp": [
+          "#000D28",
+          "#002B47",
+          "#004A68",
+          "#136B8A",
+          "#3E8DAD",
+          "#63B0D2",
+          "#88D5F8",
+          "#ADFBFF"
+        ]
+      },
+      "grafito": {
+        "role": "neutral",
+        "displayName": "Grafito",
+        "canonical": "#1F2A2E",
+        "tonalRamp": [
+          "#040D10",
+          "#1C272B",
+          "#384448",
+          "#576468",
+          "#78858A",
+          "#9AA8AD",
+          "#BECCD1",
+          "#E3F1F7"
+        ]
+      },
+      "niebla": {
+        "role": "neutral",
+        "displayName": "Niebla",
+        "canonical": "#F1F5F1",
+        "tonalRamp": [
+          "#090C09",
+          "#232623",
+          "#404340",
+          "#5F625F",
+          "#808380",
+          "#A2A6A2",
+          "#C6CAC6",
+          "#ECF0EC"
+        ]
+      },
+      "dato-1": {
+        "role": "data",
+        "displayName": "Serie 1",
+        "canonical": "#1E88B4",
+        "tonalRamp": [
+          "#000A31",
+          "#002A51",
+          "#004A72",
+          "#006B95",
+          "#268DB9",
+          "#51B1DF",
+          "#77D6FF",
+          "#A8FBFF"
+        ]
+      },
+      "dato-2": {
+        "role": "data",
+        "displayName": "Serie 2",
+        "canonical": "#4F8A26",
+        "tonalRamp": [
+          "#001300",
+          "#003100",
+          "#165100",
+          "#387200",
+          "#599532",
+          "#7BB957",
+          "#9FDE7B",
+          "#D2FEBB"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Solo la palabra VIRIDIA en la portada y el riel."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "El título de cada lámina de capa."
+      },
+      "label": {
+        "displayName": "Catálogo",
+        "purpose": "Identificadores y números de catálogo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambiente",
+        "value": "0 1px 2px rgba(23,33,36,.06), 0 10px 28px -14px rgba(23,33,36,.32)",
+        "purpose": "Planchas de diagramas, fichas, botones al pasar el cursor."
+      },
+      {
+        "name": "alta",
+        "value": "0 2px 6px rgba(23,33,36,.10), 0 24px 60px -24px rgba(23,33,36,.45)",
+        "purpose": "El panel de detalle y el nodo elegido."
+      }
+    ],
+    "motion": [
+      {
+        "name": "salida",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Toda entrada y cambio de estado."
+      },
+      {
+        "name": "rapido",
+        "value": "160ms",
+        "purpose": "Respuesta inmediata."
+      },
+      {
+        "name": "medio",
+        "value": "280ms",
+        "purpose": "Cambios de estado y panel de detalle."
+      },
+      {
+        "name": "lento",
+        "value": "620ms",
+        "purpose": "Entrada de las etapas del simulador."
+      },
+      {
+        "name": "savia",
+        "value": "stroke-dasharray 9 7 · 0.9s linear infinite",
+        "purpose": "Relaciones encendidas en diagramas, nervadura y BPMN."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "celular",
+        "value": "620px"
+      },
+      {
+        "name": "tableta",
+        "value": "960px"
+      },
+      {
+        "name": "escritorio-angosto",
+        "value": "1180px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal sobre campos oscuros (portada).",
+      "html": "<button class=\"ds-btn-lima\">Recorrer la arquitectura</button>",
+      "css": ".ds-btn-lima{background:#7FBF4D;color:#172124;border:0;border-radius:4px;min-height:46px;padding:.7rem 1.25rem;font:700 1rem Lato,sans-serif;cursor:pointer;transition:transform .16s cubic-bezier(.16,1,.3,1),background .16s}.ds-btn-lima:hover{background:#A8D97A;transform:translateY(-2px);box-shadow:0 1px 2px rgba(23,33,36,.06),0 10px 28px -14px rgba(23,33,36,.32)}.ds-btn-lima:focus-visible{outline:2px solid #2A7B9B;outline-offset:3px}"
+    },
+    {
+      "name": "Botón sólido",
+      "kind": "button",
+      "refersTo": "button-solid",
+      "description": "Acción principal sobre papel.",
+      "html": "<button class=\"ds-btn-verde\">Probar el cálculo en el simulador</button>",
+      "css": ".ds-btn-verde{background:#1B5E3A;color:#fff;border:0;border-radius:4px;min-height:46px;padding:.7rem 1.25rem;font:700 1rem Lato,sans-serif;cursor:pointer;transition:transform .16s cubic-bezier(.16,1,.3,1),background .16s}.ds-btn-verde:hover{background:#2C7550;transform:translateY(-2px)}.ds-btn-verde:focus-visible{outline:2px solid #2A7B9B;outline-offset:3px}"
+    },
+    {
+      "name": "Botón discreto",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Acciones secundarias.",
+      "html": "<button class=\"ds-btn-claro\">Ver todo</button>",
+      "css": ".ds-btn-claro{background:#fff;color:#1F2A2E;border:1px solid rgba(31,42,46,.28);border-radius:4px;min-height:36px;padding:.45rem .8rem;font:700 .88rem Lato,sans-serif;cursor:pointer}.ds-btn-claro:hover{border-color:#1B5E3A;color:#1B5E3A}.ds-btn-claro:focus-visible{outline:2px solid #2A7B9B;outline-offset:3px}"
+    },
+    {
+      "name": "Chip de identificador",
+      "kind": "chip",
+      "refersTo": "chip-id",
+      "description": "Número de catálogo clicable que abre la ficha del elemento.",
+      "html": "<a class=\"ds-chip\" href=\"#\">C2</a> <a class=\"ds-chip ds-chip-oe\" href=\"#\">OE2</a>",
+      "css": ".ds-chip{display:inline-flex;font:600 .74rem/1 \"IBM Plex Mono\",monospace;letter-spacing:.03em;padding:.3rem .45rem;border-radius:3px;border:1px solid currentColor;color:#1B5E3A;text-decoration:none;transition:background .16s,color .16s}.ds-chip:hover{background:#1B5E3A;color:#fff}.ds-chip-oe{color:#1F5F78}.ds-chip-oe:hover{background:#1F5F78;color:#fff}.ds-chip:focus-visible{outline:2px solid #2A7B9B;outline-offset:3px}"
+    },
+    {
+      "name": "Campo numérico",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Entradas del simulador con cifras tabulares.",
+      "html": "<label class=\"ds-campo\">Consumo real medido<input type=\"number\" value=\"495000\"></label>",
+      "css": ".ds-campo{display:flex;flex-direction:column;gap:.35rem;font:700 .86rem Lato,sans-serif;color:#1F2A2E}.ds-campo input{font:500 1rem Lato,sans-serif;font-variant-numeric:tabular-nums;padding:.65rem .7rem;border:1px solid rgba(31,42,46,.28);border-radius:4px;min-height:44px;caret-color:#1B5E3A}.ds-campo input:focus{outline:2px solid #1B5E3A;outline-offset:1px}"
+    },
+    {
+      "name": "Ítem del riel",
+      "kind": "nav",
+      "refersTo": "rail",
+      "description": "Nodo de la vena de navegación; el activo se rellena de lima.",
+      "html": "<nav class=\"ds-riel\"><a class=\"ds-nodo\" aria-current=\"page\" href=\"#\">Estrategia <span>OE · C</span></a><a class=\"ds-nodo\" href=\"#\">Procesos <span>BPMN · RN</span></a></nav>",
+      "css": ".ds-riel{background:#1F2A2E;padding:.6rem 0;width:288px}.ds-nodo{position:relative;display:flex;justify-content:space-between;padding:.5rem 1.4rem .5rem 3.1rem;color:#C9D4D1;text-decoration:none;font:400 .98rem Lato,sans-serif}.ds-nodo span{font:500 .7rem \"IBM Plex Mono\",monospace;color:#9AACA7}.ds-nodo::before{content:\"\";position:absolute;left:calc(2.05rem - 4px);top:50%;margin-top:-4.5px;width:9px;height:9px;border-radius:50%;background:#1F2A2E;border:1.5px solid rgba(127,191,77,.6);transition:transform .28s cubic-bezier(.16,1,.3,1)}.ds-nodo[aria-current=page]{color:#fff;font-weight:700}.ds-nodo[aria-current=page]::before{background:#7FBF4D;border-color:#7FBF4D;transform:scale(1.3)}.ds-nodo:hover{color:#fff}.ds-nodo:focus-visible{outline:2px solid #A8D97A;outline-offset:-2px}"
+    },
+    {
+      "name": "Lámina de capa",
+      "kind": "custom",
+      "refersTo": "layer-opener",
+      "description": "Cabecera verde de cada capa con título, pregunta y pie de lámina.",
+      "html": "<header class=\"ds-lamina\"><h1>Arquitectura estratégica</h1><p>¿Por qué existe la empresa, hacia dónde va y qué debe ser capaz de hacer?</p><small><i>Ceiba pentandra</i> · cinco ramas, diez raíces</small></header>",
+      "css": ".ds-lamina{background:#1B5E3A;color:#fff;padding:2.4rem 2rem 1.4rem;font-family:Lato,sans-serif}.ds-lamina h1{font-weight:900;font-size:2.6rem;letter-spacing:-.025em;line-height:1.02;margin:0}.ds-lamina p{font-weight:300;font-size:1.2rem;color:#D4E9BF;margin:.9rem 0}.ds-lamina small{display:block;text-align:right;color:#D4E9BF;font-size:.82rem}"
+    }
+  ],
+  "narrative": {
+    "northStar": "La lámina de campo",
+    "overview": "Cada capa de la arquitectura se presenta como una lámina de una guía de campo botánica impresa sobre una plancha topográfica. Los elementos de la arquitectura son especímenes con su número de catálogo, y la trazabilidad entre ellos se dibuja como la nervadura de una hoja, la misma que aparece en el logo. El marco pertenece al mundo; la columna de lectura es tranquila, sobre papel niebla.\n\nLa densidad es la de un documento técnico que se explora: tablas, matrices y diagramas a escala real, con el detalle en un panel lateral. El movimiento explica estado y relación: la savia que recorre una cadena, el pulso de una lectura del medidor a la factura, el camino iluminado de un BPMN.",
+    "keyCharacteristics": [
+      "Marco comprometido (grafito y verde) alrededor de una columna de lectura clara.",
+      "Grabados botánico-técnicos en tinta lima pálida sobre campos oscuros, con pie de lámina.",
+      "Identificadores en monoespaciada como números de catálogo: siempre clicables.",
+      "Diagramas como figuras a escala: nodos HTML accesibles sobre aristas SVG.",
+      "Una sola gramática de movimiento: savia que fluye por las relaciones."
+    ],
+    "rules": [
+      {
+        "name": "The One Field Rule",
+        "body": "Solo el verde (cabeceras, declaraciones) y el grafito (riel, portada) ocupan regiones completas; lima y agua son trazo y señal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Validated Series Rule",
+        "body": "Las series de gráficas usan solo dato-1 y dato-2, validadas para daltonismo y contraste; las líneas de referencia (esperado, objetivo) van en grafito, continua o discontinua.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reserved State Rule",
+        "body": "Ocre (pendiente) y rojo (no cumple, sin factura) son estados del proceso y siempre van con su texto; nunca se usan como color de serie ni de decoración.",
+        "section": "colors"
+      },
+      {
+        "name": "The Catalog Mono Rule",
+        "body": "La monoespaciada es solo para datos: identificadores, cifras, ecuaciones y códigos. Etiquetas de formulario, títulos de panel y textos de apoyo van en Lato.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Eyebrow Rule",
+        "body": "Nada va encima de un título: el identificador se escribe en la misma línea que el nombre y los metadatos (periodo, sector, fuente) van debajo.",
+        "section": "typography"
+      },
+      {
+        "name": "The Neutral Light Rule",
+        "body": "Las sombras son neutras (grafito con opacidad) y llevan desplazamiento y desenfoque; ningún halo de color, ni siquiera lima sobre grafito.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** abrir cada capa con su lámina verde, su pregunta y su sumario de anclas.",
+      "**Do** escribir el identificador en la misma línea que el nombre y hacerlo clicable hacia su ficha.",
+      "**Do** marcar cada cifra propuesta por el equipo con la P en superíndice y declarar como ilustrativo todo dato de ejemplo.",
+      "**Do** usar dato-1 y dato-2 para series y grafito para líneas de referencia; ofrecer siempre la tabla equivalente.",
+      "**Do** respetar `prefers-reduced-motion`: el estado se sigue viendo, el movimiento desaparece."
+    ],
+    "donts": [
+      "**Don't** poner etiquetas encima de los títulos (sector, periodo, fuente o número de orden).",
+      "**Don't** usar halos o resplandores de color, vidrio esmerilado decorativo ni franjas repetidas.",
+      "**Don't** usar bordes laterales de color de más de 1px en tarjetas, avisos o citas.",
+      "**Don't** usar la monoespaciada para etiquetas o títulos que no son datos.",
+      "**Don't** pintar regiones grandes de lima o agua: son trazo y señal."
+    ]
+  }
+}

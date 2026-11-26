@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Def_2" targetNamespace="http://viridia.example/bpmn" exporter="generar_bpmn.py (VIRIDIA, Corte III)" exporterVersion="2.0">
+  <bpmn:collaboration id="Collab_2">
+    <bpmn:documentation>VIRIDIA S.A.S. BIC (empresa ficticia, uso académico). BPMN · Ciclo de servicio, parte 2: operación y cierre del contrato (fases 8 a 12).</bpmn:documentation>
+    <bpmn:participant id="P2_CLI" name="CLIENTE" processRef="Proc2_Cliente"/>
+    <bpmn:participant id="P2_VIR" name="VIRIDIA S.A.S. BIC" processRef="Proc2_Viridia"/>
+    <bpmn:participant id="P2_VER" name="VERIFICADOR" processRef="Proc2_Verificador"/>
+    <bpmn:messageFlow id="Msg_2_36" name="Alerta de desviación" sourceRef="v_alE" targetRef="c_alS"/>
+    <bpmn:messageFlow id="Msg_2_37" name="Oferta de renovación" sourceRef="v_of" targetRef="c_eval"/>
+    <bpmn:messageFlow id="Msg_2_38" name="Respuesta" sourceRef="c_eval" targetRef="v_of"/>
+    <bpmn:messageFlow id="Msg_2_39" name="Equipos devueltos" sourceRef="c_dev" targetRef="v_ret"/>
+    <bpmn:messageFlow id="Msg_2_40" name="Expediente MRV" sourceRef="v_mrv" targetRef="x_s"/>
+    <bpmn:messageFlow id="Msg_2_41" name="Reporte de verificación" sourceRef="x_rev" targetRef="v_rcv"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Proc2_Cliente" name="CLIENTE" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_P2_CLI">
+      <bpmn:lane id="L2_cli" name="Cliente (gerencia de planta)">
+        <bpmn:flowNodeRef>c_A</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_eval</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_gw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_B</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_dev</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_end</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_alS</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_aj</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>c_alE</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="c_A" name="A">
+      <bpmn:outgoing>Flow_c_A_c_eval</bpmn:outgoing>
+      <bpmn:linkEventDefinition id="LED_c_A" name="A"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="c_eval" name="Decidir sobre la renovación">
+      <bpmn:incoming>Flow_c_A_c_eval</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_eval_c_gw</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="c_gw" name="¿Renueva?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_c_eval_c_gw</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_gw_c_B</bpmn:outgoing>
+      <bpmn:outgoing>Flow_c_gw_c_dev</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateThrowEvent id="c_B" name="B">
+      <bpmn:incoming>Flow_c_gw_c_B</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LED_c_B" name="B"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="c_dev" name="Devolver los equipos en comodato">
+      <bpmn:incoming>Flow_c_gw_c_dev</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_dev_c_end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="c_end" name="Servicio terminado">
+      <bpmn:incoming>Flow_c_dev_c_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="c_alS" name="Alerta recibida">
+      <bpmn:outgoing>Flow_c_alS_c_aj</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_c_alS"/>
+    </bpmn:startEvent>
+    <bpmn:task id="c_aj" name="Ajustar la operación según la alerta">
+      <bpmn:incoming>Flow_c_alS_c_aj</bpmn:incoming>
+      <bpmn:outgoing>Flow_c_aj_c_alE</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="c_alE" name="Operación ajustada">
+      <bpmn:incoming>Flow_c_aj_c_alE</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_c_A_c_eval" sourceRef="c_A" targetRef="c_eval"/>
+    <bpmn:sequenceFlow id="Flow_c_eval_c_gw" sourceRef="c_eval" targetRef="c_gw"/>
+    <bpmn:sequenceFlow id="Flow_c_dev_c_end" sourceRef="c_dev" targetRef="c_end"/>
+    <bpmn:sequenceFlow id="Flow_c_alS_c_aj" sourceRef="c_alS" targetRef="c_aj"/>
+    <bpmn:sequenceFlow id="Flow_c_aj_c_alE" sourceRef="c_aj" targetRef="c_alE"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_B" name="Sí" sourceRef="c_gw" targetRef="c_B"/>
+    <bpmn:sequenceFlow id="Flow_c_gw_c_dev" name="No" sourceRef="c_gw" targetRef="c_dev"/>
+  </bpmn:process>
+  <bpmn:process id="Proc2_Viridia" name="VIRIDIA S.A.S. BIC" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_P2_VIR">
+      <bpmn:lane id="L2_com" name="Comercial y Mercadeo">
+        <bpmn:flowNodeRef>v_of</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gr</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_B</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L2_ent" name="Entrega de Servicio">
+        <bpmn:flowNodeRef>v_rep</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_repE</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_al</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_alE</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_mrv</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_rcv</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L2_tec" name="Tecnología y Gob. de Datos">
+        <bpmn:flowNodeRef>v_A</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_par</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_mon</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>b24</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>bband</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_monE</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L2_id" name="I+D en IA">
+        <bpmn:flowNodeRef>v_rec</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L2_sos" name="Sostenibilidad y Op. Verdes">
+        <bpmn:flowNodeRef>v_cons</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_ret</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_end</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="L2_fin" name="Finanzas e Inversión">
+        <bpmn:flowNodeRef>v_m1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_t</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_call</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_m2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_ga</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_m3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>v_gt</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:intermediateCatchEvent id="v_A" name="A">
+      <bpmn:outgoing>Flow_v_A_v_par</bpmn:outgoing>
+      <bpmn:linkEventDefinition id="LED_v_A" name="A"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="v_par" name="" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_A_v_par</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_par_v_mon</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_par_v_m1</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="v_mon" name="Monitorear consumo y estado de medidores">
+      <bpmn:incoming>Flow_v_par_v_mon</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_mon_v_monE</bpmn:outgoing>
+      <bpmn:standardLoopCharacteristics/>
+    </bpmn:task>
+    <bpmn:boundaryEvent id="b24" name="Medidor sin datos &gt; 24 h" attachedToRef="v_mon" cancelActivity="false">
+      <bpmn:outgoing>Flow_b24_v_rep</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="CED_b24"><bpmn:condition xsi:type="bpmn:tFormalExpression">horas sin lecturas &gt; 24</bpmn:condition></bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="bband" name="Consumo fuera de banda ±10 %" attachedToRef="v_mon" cancelActivity="false">
+      <bpmn:outgoing>Flow_bband_v_al</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition id="CED_bband"><bpmn:condition xsi:type="bpmn:tFormalExpression">|real - esperado| / esperado &gt; 0,10</bpmn:condition></bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="v_monE" name="Monitoreo cerrado">
+      <bpmn:incoming>Flow_v_mon_v_monE</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="v_rep" name="Reparar o reemplazar el medidor">
+      <bpmn:incoming>Flow_b24_v_rep</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_rep_v_repE</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="v_repE" name="Medidor restablecido">
+      <bpmn:incoming>Flow_v_rep_v_repE</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="v_al" name="Emitir alerta de desviación al cliente">
+      <bpmn:incoming>Flow_bband_v_al</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_al_v_alE</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="v_alE" name="Alerta enviada">
+      <bpmn:incoming>Flow_v_al_v_alE</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MED_v_alE"/>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="v_m1" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_v_par_v_m1</bpmn:incoming>
+      <bpmn:incoming>Flow_v_gt_v_m1</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_m1_v_t</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="v_t" name="Primer día de cada mes">
+      <bpmn:incoming>Flow_v_m1_v_t</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_t_v_call</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_v_t"><bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/P1M</bpmn:timeCycle></bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:callActivity id="v_call" name="Cierre mensual: cálculo y facturación del ahorro verificado" calledElement="Proc3_Cierre">
+      <bpmn:incoming>Flow_v_t_v_call</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_call_v_gq</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="v_gq" name="¿Fin de trimestre?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_call_v_gq</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gq_v_rec</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_gq_v_m2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_rec" name="Recalcular línea base (nueva versión)">
+      <bpmn:incoming>Flow_v_gq_v_rec</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_rec_v_m2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_m2" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_v_gq_v_m2</bpmn:incoming>
+      <bpmn:incoming>Flow_v_rec_v_m2</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_m2_v_ga</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="v_ga" name="¿Fin de año contractual?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_m2_v_ga</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_ga_v_mrv</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_ga_v_m3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_mrv" name="Preparar expediente MRV anual">
+      <bpmn:incoming>Flow_v_ga_v_mrv</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_mrv_v_rcv</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="v_rcv" name="Reporte recibido">
+      <bpmn:incoming>Flow_v_mrv_v_rcv</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_rcv_v_cons</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_v_rcv"/>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="v_cons" name="Consolidar informe BIC y reporte ESG">
+      <bpmn:incoming>Flow_v_rcv_v_cons</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_cons_v_m3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_m3" name="Unión" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_v_ga_v_m3</bpmn:incoming>
+      <bpmn:incoming>Flow_v_cons_v_m3</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_m3_v_gt</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="v_gt" name="¿Termina el contrato?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_m3_v_gt</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gt_v_m1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_gt_v_of</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="v_of" name="Ofrecer la renovación al cliente">
+      <bpmn:incoming>Flow_v_gt_v_of</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_of_v_gr</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="v_gr" name="¿Se renueva el contrato?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_v_of_v_gr</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_gr_v_B</bpmn:outgoing>
+      <bpmn:outgoing>Flow_v_gr_v_ret</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateThrowEvent id="v_B" name="B">
+      <bpmn:incoming>Flow_v_gr_v_B</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LED_v_B" name="B"/>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:task id="v_ret" name="Retirar y reacondicionar equipos">
+      <bpmn:incoming>Flow_v_gr_v_ret</bpmn:incoming>
+      <bpmn:outgoing>Flow_v_ret_v_end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="v_end" name="Contrato cerrado">
+      <bpmn:incoming>Flow_v_ret_v_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_v_A_v_par" sourceRef="v_A" targetRef="v_par"/>
+    <bpmn:sequenceFlow id="Flow_v_par_v_mon" sourceRef="v_par" targetRef="v_mon"/>
+    <bpmn:sequenceFlow id="Flow_v_mon_v_monE" sourceRef="v_mon" targetRef="v_monE"/>
+    <bpmn:sequenceFlow id="Flow_b24_v_rep" sourceRef="b24" targetRef="v_rep"/>
+    <bpmn:sequenceFlow id="Flow_v_rep_v_repE" sourceRef="v_rep" targetRef="v_repE"/>
+    <bpmn:sequenceFlow id="Flow_bband_v_al" sourceRef="bband" targetRef="v_al"/>
+    <bpmn:sequenceFlow id="Flow_v_al_v_alE" sourceRef="v_al" targetRef="v_alE"/>
+    <bpmn:sequenceFlow id="Flow_v_par_v_m1" sourceRef="v_par" targetRef="v_m1"/>
+    <bpmn:sequenceFlow id="Flow_v_m1_v_t" sourceRef="v_m1" targetRef="v_t"/>
+    <bpmn:sequenceFlow id="Flow_v_t_v_call" sourceRef="v_t" targetRef="v_call"/>
+    <bpmn:sequenceFlow id="Flow_v_call_v_gq" sourceRef="v_call" targetRef="v_gq"/>
+    <bpmn:sequenceFlow id="Flow_v_m2_v_ga" sourceRef="v_m2" targetRef="v_ga"/>
+    <bpmn:sequenceFlow id="Flow_v_mrv_v_rcv" sourceRef="v_mrv" targetRef="v_rcv"/>
+    <bpmn:sequenceFlow id="Flow_v_m3_v_gt" sourceRef="v_m3" targetRef="v_gt"/>
+    <bpmn:sequenceFlow id="Flow_v_of_v_gr" sourceRef="v_of" targetRef="v_gr"/>
+    <bpmn:sequenceFlow id="Flow_v_ret_v_end" sourceRef="v_ret" targetRef="v_end"/>
+    <bpmn:sequenceFlow id="Flow_v_gq_v_rec" name="Sí" sourceRef="v_gq" targetRef="v_rec"/>
+    <bpmn:sequenceFlow id="Flow_v_gq_v_m2" name="No" sourceRef="v_gq" targetRef="v_m2"/>
+    <bpmn:sequenceFlow id="Flow_v_rec_v_m2" sourceRef="v_rec" targetRef="v_m2"/>
+    <bpmn:sequenceFlow id="Flow_v_ga_v_mrv" name="Sí" sourceRef="v_ga" targetRef="v_mrv"/>
+    <bpmn:sequenceFlow id="Flow_v_ga_v_m3" name="No" sourceRef="v_ga" targetRef="v_m3"/>
+    <bpmn:sequenceFlow id="Flow_v_rcv_v_cons" sourceRef="v_rcv" targetRef="v_cons"/>
+    <bpmn:sequenceFlow id="Flow_v_cons_v_m3" sourceRef="v_cons" targetRef="v_m3"/>
+    <bpmn:sequenceFlow id="Flow_v_gt_v_m1" name="No" sourceRef="v_gt" targetRef="v_m1"/>
+    <bpmn:sequenceFlow id="Flow_v_gt_v_of" name="Sí" sourceRef="v_gt" targetRef="v_of"/>
+    <bpmn:sequenceFlow id="Flow_v_gr_v_B" name="Sí" sourceRef="v_gr" targetRef="v_B"/>
+    <bpmn:sequenceFlow id="Flow_v_gr_v_ret" name="No" sourceRef="v_gr" targetRef="v_ret"/>
+  </bpmn:process>
+  <bpmn:process id="Proc2_Verificador" name="VERIFICADOR" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_P2_VER">
+      <bpmn:lane id="L2_ver" name="Verificador independiente">
+        <bpmn:flowNodeRef>x_s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>x_rev</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>x_end</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="x_s" name="Expediente recibido">
+      <bpmn:outgoing>Flow_x_s_x_rev</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_x_s"/>
+    </bpmn:startEvent>
+    <bpmn:task id="x_rev" name="Revisar metodología y ahorro del año; emitir el reporte">
+      <bpmn:incoming>Flow_x_s_x_rev</bpmn:incoming>
+      <bpmn:outgoing>Flow_x_rev_x_end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="x_end" name="Verificación emitida">
+      <bpmn:incoming>Flow_x_rev_x_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_x_s_x_rev" sourceRef="x_s" targetRef="x_rev"/>
+    <bpmn:sequenceFlow id="Flow_x_rev_x_end" sourceRef="x_rev" targetRef="x_end"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_2" name="BPMN · Ciclo de servicio, parte 2: operación y cierre del contrato (fases 8 a 12)">
+    <bpmndi:BPMNPlane id="Plane_2" bpmnElement="Collab_2">
+      <bpmndi:BPMNShape id="P2_CLI_di" bpmnElement="P2_CLI" isHorizontal="true"><dc:Bounds x="0" y="0" width="1838" height="152"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_cli_di" bpmnElement="L2_cli" isHorizontal="true"><dc:Bounds x="26" y="0" width="1812" height="152"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P2_VIR_di" bpmnElement="P2_VIR" isHorizontal="true"><dc:Bounds x="0" y="170" width="1838" height="676"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_com_di" bpmnElement="L2_com" isHorizontal="true"><dc:Bounds x="26" y="170" width="1812" height="104"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_ent_di" bpmnElement="L2_ent" isHorizontal="true"><dc:Bounds x="26" y="274" width="1812" height="116"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_tec_di" bpmnElement="L2_tec" isHorizontal="true"><dc:Bounds x="26" y="390" width="1812" height="124"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_id_di" bpmnElement="L2_id" isHorizontal="true"><dc:Bounds x="26" y="514" width="1812" height="96"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_sos_di" bpmnElement="L2_sos" isHorizontal="true"><dc:Bounds x="26" y="610" width="1812" height="104"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_fin_di" bpmnElement="L2_fin" isHorizontal="true"><dc:Bounds x="26" y="714" width="1812" height="132"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P2_VER_di" bpmnElement="P2_VER" isHorizontal="true"><dc:Bounds x="0" y="864" width="1838" height="108"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="L2_ver_di" bpmnElement="L2_ver" isHorizontal="true"><dc:Bounds x="26" y="864" width="1812" height="108"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_A_di" bpmnElement="c_A"><dc:Bounds x="149" y="23" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_eval_di" bpmnElement="c_eval"><dc:Bounds x="1373" y="8" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_gw_di" bpmnElement="c_gw" isMarkerVisible="true"><dc:Bounds x="1534" y="18" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_B_di" bpmnElement="c_B"><dc:Bounds x="1624" y="23" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_dev_di" bpmnElement="c_dev"><dc:Bounds x="1588" y="82" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_end_di" bpmnElement="c_end"><dc:Bounds x="1754" y="97" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_alS_di" bpmnElement="c_alS"><dc:Bounds x="644" y="97" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_aj_di" bpmnElement="c_aj"><dc:Bounds x="698" y="82" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="c_alE_di" bpmnElement="c_alE"><dc:Bounds x="864" y="97" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_A_di" bpmnElement="v_A"><dc:Bounds x="149" y="445" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_par_di" bpmnElement="v_par"><dc:Bounds x="214" y="440" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_mon_di" bpmnElement="v_mon"><dc:Bounds x="288" y="430" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="b24_di" bpmnElement="b24"><dc:Bounds x="292" y="417" width="26" height="26"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="bband_di" bpmnElement="bband"><dc:Bounds x="404" y="417" width="26" height="26"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_monE_di" bpmnElement="v_monE"><dc:Bounds x="479" y="445" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_rep_di" bpmnElement="v_rep"><dc:Bounds x="232" y="300" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_repE_di" bpmnElement="v_repE"><dc:Bounds x="404" y="315" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_al_di" bpmnElement="v_al"><dc:Bounds x="483" y="300" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_alE_di" bpmnElement="v_alE"><dc:Bounds x="644" y="315" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_m1_di" bpmnElement="v_m1" isMarkerVisible="false"><dc:Bounds x="274" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_t_di" bpmnElement="v_t"><dc:Bounds x="354" y="755" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_call_di" bpmnElement="v_call" isExpanded="false"><dc:Bounds x="413" y="735" width="146" height="74"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gq_di" bpmnElement="v_gq" isMarkerVisible="true"><dc:Bounds x="579" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_rec_di" bpmnElement="v_rec"><dc:Bounds x="618" y="530" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_m2_di" bpmnElement="v_m2" isMarkerVisible="false"><dc:Bounds x="764" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_ga_di" bpmnElement="v_ga" isMarkerVisible="true"><dc:Bounds x="844" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_mrv_di" bpmnElement="v_mrv"><dc:Bounds x="903" y="300" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_rcv_di" bpmnElement="v_rcv"><dc:Bounds x="1069" y="315" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_cons_di" bpmnElement="v_cons"><dc:Bounds x="1123" y="630" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_m3_di" bpmnElement="v_m3" isMarkerVisible="false"><dc:Bounds x="1284" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gt_di" bpmnElement="v_gt" isMarkerVisible="true"><dc:Bounds x="1359" y="750" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_of_di" bpmnElement="v_of"><dc:Bounds x="1373" y="190" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_gr_di" bpmnElement="v_gr" isMarkerVisible="true"><dc:Bounds x="1534" y="200" width="44" height="44"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_B_di" bpmnElement="v_B"><dc:Bounds x="1624" y="205" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_ret_di" bpmnElement="v_ret"><dc:Bounds x="1483" y="630" width="146" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_end_di" bpmnElement="v_end"><dc:Bounds x="1649" y="645" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="x_s_di" bpmnElement="x_s"><dc:Bounds x="959" y="901" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="x_rev_di" bpmnElement="x_rev"><dc:Bounds x="1011" y="886" width="160" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="x_end_di" bpmnElement="x_end"><dc:Bounds x="1204" y="901" width="34" height="34"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_c_A_c_eval_di" bpmnElement="Flow_c_A_c_eval"><di:waypoint x="183" y="40"/><di:waypoint x="1373" y="40"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_eval_c_gw_di" bpmnElement="Flow_c_eval_c_gw"><di:waypoint x="1519" y="40"/><di:waypoint x="1534" y="40"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_dev_c_end_di" bpmnElement="Flow_c_dev_c_end"><di:waypoint x="1734" y="114"/><di:waypoint x="1754" y="114"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_alS_c_aj_di" bpmnElement="Flow_c_alS_c_aj"><di:waypoint x="678" y="114"/><di:waypoint x="698" y="114"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_aj_c_alE_di" bpmnElement="Flow_c_aj_c_alE"><di:waypoint x="844" y="114"/><di:waypoint x="864" y="114"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_B_di" bpmnElement="Flow_c_gw_c_B"><di:waypoint x="1578" y="40"/><di:waypoint x="1624" y="40"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_c_gw_c_dev_di" bpmnElement="Flow_c_gw_c_dev"><di:waypoint x="1556" y="62"/><di:waypoint x="1556" y="114"/><di:waypoint x="1588" y="114"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_A_v_par_di" bpmnElement="Flow_v_A_v_par"><di:waypoint x="183" y="462"/><di:waypoint x="214" y="462"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_par_v_mon_di" bpmnElement="Flow_v_par_v_mon"><di:waypoint x="258" y="462"/><di:waypoint x="288" y="462"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_mon_v_monE_di" bpmnElement="Flow_v_mon_v_monE"><di:waypoint x="434" y="462"/><di:waypoint x="479" y="462"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_b24_v_rep_di" bpmnElement="Flow_b24_v_rep"><di:waypoint x="305" y="417"/><di:waypoint x="305" y="364"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_rep_v_repE_di" bpmnElement="Flow_v_rep_v_repE"><di:waypoint x="378" y="332"/><di:waypoint x="404" y="332"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_bband_v_al_di" bpmnElement="Flow_bband_v_al"><di:waypoint x="417" y="417"/><di:waypoint x="417" y="378"/><di:waypoint x="556" y="378"/><di:waypoint x="556" y="364"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_al_v_alE_di" bpmnElement="Flow_v_al_v_alE"><di:waypoint x="629" y="332"/><di:waypoint x="644" y="332"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_par_v_m1_di" bpmnElement="Flow_v_par_v_m1"><di:waypoint x="236" y="484"/><di:waypoint x="236" y="772"/><di:waypoint x="274" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_m1_v_t_di" bpmnElement="Flow_v_m1_v_t"><di:waypoint x="318" y="772"/><di:waypoint x="354" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_t_v_call_di" bpmnElement="Flow_v_t_v_call"><di:waypoint x="388" y="772"/><di:waypoint x="413" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_call_v_gq_di" bpmnElement="Flow_v_call_v_gq"><di:waypoint x="559" y="772"/><di:waypoint x="579" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_m2_v_ga_di" bpmnElement="Flow_v_m2_v_ga"><di:waypoint x="808" y="772"/><di:waypoint x="844" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_mrv_v_rcv_di" bpmnElement="Flow_v_mrv_v_rcv"><di:waypoint x="1049" y="332"/><di:waypoint x="1069" y="332"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_m3_v_gt_di" bpmnElement="Flow_v_m3_v_gt"><di:waypoint x="1328" y="772"/><di:waypoint x="1359" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_of_v_gr_di" bpmnElement="Flow_v_of_v_gr"><di:waypoint x="1519" y="222"/><di:waypoint x="1534" y="222"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_ret_v_end_di" bpmnElement="Flow_v_ret_v_end"><di:waypoint x="1629" y="662"/><di:waypoint x="1649" y="662"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gq_v_rec_di" bpmnElement="Flow_v_gq_v_rec"><di:waypoint x="601" y="750"/><di:waypoint x="601" y="562"/><di:waypoint x="618" y="562"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gq_v_m2_di" bpmnElement="Flow_v_gq_v_m2"><di:waypoint x="623" y="772"/><di:waypoint x="764" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_rec_v_m2_di" bpmnElement="Flow_v_rec_v_m2"><di:waypoint x="764" y="562"/><di:waypoint x="786" y="562"/><di:waypoint x="786" y="750"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_ga_v_mrv_di" bpmnElement="Flow_v_ga_v_mrv"><di:waypoint x="866" y="750"/><di:waypoint x="866" y="332"/><di:waypoint x="903" y="332"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_ga_v_m3_di" bpmnElement="Flow_v_ga_v_m3"><di:waypoint x="888" y="772"/><di:waypoint x="1284" y="772"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_rcv_v_cons_di" bpmnElement="Flow_v_rcv_v_cons"><di:waypoint x="1103" y="332"/><di:waypoint x="1196" y="332"/><di:waypoint x="1196" y="630"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_cons_v_m3_di" bpmnElement="Flow_v_cons_v_m3"><di:waypoint x="1269" y="662"/><di:waypoint x="1306" y="662"/><di:waypoint x="1306" y="750"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gt_v_m1_di" bpmnElement="Flow_v_gt_v_m1"><di:waypoint x="1381" y="794"/><di:waypoint x="1381" y="836"/><di:waypoint x="296" y="836"/><di:waypoint x="296" y="794"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gt_v_of_di" bpmnElement="Flow_v_gt_v_of"><di:waypoint x="1403" y="772"/><di:waypoint x="1446" y="772"/><di:waypoint x="1446" y="254"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gr_v_B_di" bpmnElement="Flow_v_gr_v_B"><di:waypoint x="1578" y="222"/><di:waypoint x="1624" y="222"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_v_gr_v_ret_di" bpmnElement="Flow_v_gr_v_ret"><di:waypoint x="1556" y="244"/><di:waypoint x="1556" y="630"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_x_s_x_rev_di" bpmnElement="Flow_x_s_x_rev"><di:waypoint x="993" y="918"/><di:waypoint x="1011" y="918"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_x_rev_x_end_di" bpmnElement="Flow_x_rev_x_end"><di:waypoint x="1171" y="918"/><di:waypoint x="1204" y="918"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_36_di" bpmnElement="Msg_2_36"><di:waypoint x="661" y="315"/><di:waypoint x="661" y="131"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_37_di" bpmnElement="Msg_2_37"><di:waypoint x="1423" y="190"/><di:waypoint x="1423" y="72"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_38_di" bpmnElement="Msg_2_38"><di:waypoint x="1469" y="72"/><di:waypoint x="1469" y="190"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_39_di" bpmnElement="Msg_2_39"><di:waypoint x="1611" y="146"/><di:waypoint x="1611" y="630"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_40_di" bpmnElement="Msg_2_40"><di:waypoint x="976" y="364"/><di:waypoint x="976" y="901"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_41_di" bpmnElement="Msg_2_41"><di:waypoint x="1086" y="886"/><di:waypoint x="1086" y="349"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

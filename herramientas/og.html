@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Imagen para compartir</title>
+<!-- Plantilla de la imagen para redes (img/og-viridia.png). La captura herramientas/generar_og.py. -->
+<link rel="stylesheet" href="../css/viridia.css">
+<style>
+  body { margin: 0; background: var(--grafito); }
+  .og { position: relative; width: 1200px; height: 630px; overflow: hidden; background: var(--grafito); color: #fff; display: grid; grid-template-columns: 560px 1fr; align-items: center; }
+  .og::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 70% at 78% 40%, rgba(127,191,77,.18), transparent 70%); pointer-events: none; }
+  .og .topo { position: absolute; inset: 0; opacity: .3; }
+  .texto { position: relative; z-index: 1; padding-left: 72px; }
+  .texto svg { width: 84px; height: 84px; margin-bottom: 22px; }
+  .palabra { font-weight: 900; font-size: 92px; letter-spacing: .16em; line-height: .95; }
+  .razon { font: 500 15px/1 var(--mono); letter-spacing: .26em; color: var(--lima); margin: 16px 0 26px; }
+  .eslogan { font-weight: 300; font-size: 30px; color: var(--lima-tinta); line-height: 1.25; max-width: 15em; }
+  .pie { position: absolute; left: 72px; bottom: 40px; font-size: 18px; color: #B9C6C2; z-index: 1; }
+  .lamina { position: relative; z-index: 1; width: 640px; }
+</style>
+</head>
+<body>
+<div class="og">
+  <svg class="topo" data-semilla="11" data-niveles="16"></svg>
+  <div class="texto">
+    <svg viewBox="0 0 100 100" fill="none"><path d="M78.8 27.5 A36.5 36.5 0 1 1 42.4 14.3" stroke="#fff" stroke-width="3" stroke-linecap="round"/><polygon points="49.1,12.4 43.2,17.1 41.6,11.5" fill="#fff"/><path d="M50 69.5 C75.5 62.5 73 35.5 50 26.8 C27 35.5 24.5 62.5 50 69.5 Z" fill="#7FBF4D"/><path d="M50 65.8 V31.5 M50 41.5 L39.3 50.5 M50 48.5 L61.3 56.5 M50 56 L41.3 62" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <div class="palabra">VIRIDIA</div>
+    <div class="razon">S.A.S. BIC · ARQUITECTURA EMPRESARIAL</div>
+    <div class="eslogan">«Inteligencia que devuelve más de lo que consume»</div>
+  </div>
+  <img class="lamina" src="../img/laminas/portada.webp" alt="">
+  <div class="pie">Estrategia · procesos · información · aplicaciones · tecnología · transformación</div>
+</div>
+</body>
+</html>

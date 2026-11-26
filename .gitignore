@@ -1,0 +1,6 @@
+# Capturas de revisión locales y archivos temporales
+.impeccable/review/
+__pycache__/
+*.zip
+Thumbs.db
+.DS_Store
